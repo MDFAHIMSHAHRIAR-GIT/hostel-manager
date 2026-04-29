@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hostel Manager Pro | Boss Edition</title>
+    <!-- PWA Metadata for App-like feel -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#3182ce">
     <style>
         :root { --primary: #3182ce; --success: #38a169; --danger: #e53e3e; --admin: #7c3aed; --utility: #d97706; --notice: #fffbeb; }
         body { font-family: system-ui, sans-serif; max-width: 900px; margin: 1rem auto; padding: 1rem; background: #f8fafc; color: #1e293b; }
@@ -12,11 +16,8 @@
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
         @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
         
-        /* Layout Sections */
-        .notice-card { background: var(--notice); border: 1px solid #fef3c7; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; }
         .stats-board { display: flex; justify-content: space-around; background: var(--primary); color: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; text-align: center; font-weight: bold;}
         
-        /* Activity Tabs */
         .ledger-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; }
         @media (max-width: 600px) { .ledger-container { grid-template-columns: 1fr; } }
         .ledger-col { background: #f1f5f9; padding: 10px; border-radius: 8px; min-height: 100px; }
@@ -31,6 +32,7 @@
         
         .hidden { display: none !important; }
         .list-item { font-size: 0.8rem; padding: 5px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .timestamp-label { font-size: 0.65rem; color: #64748b; display: block; }
     </style>
 </head>
 <body>
@@ -49,27 +51,25 @@
             <button id="logoutBtn" class="btn-danger" style="background:#64748b">Logout</button>
         </div>
 
-        <!-- BOSS ONLY: ADMIN PANEL -->
+        <!-- ADMIN PANEL: Updated Labels -->
         <div id="bossPanel" class="card admin-card hidden">
-            <h4 style="color: var(--admin); margin: 0 0 10px 0;">🛡️ Admin Master Control</h4>
+            <h4 style="color: var(--admin); margin: 0 0 10px 0;">🛡️ Member Meal Entry (Admin)</h4>
             <div class="grid">
-                <input type="text" id="targetMember" placeholder="Member Name">
+                <input type="text" id="targetMember" placeholder="Type Username (e.g. rocky)">
                 <input type="number" id="adminMealQty" step="0.25" value="1">
             </div>
             <div style="display:flex; gap:10px;">
-                <button id="adminLunchBtn" class="btn-admin">Force Lunch</button>
-                <button id="adminDinnerBtn" class="btn-admin">Force Dinner</button>
+                <button id="adminLunchBtn" class="btn-admin">Lunch</button>
+                <button id="adminDinnerBtn" class="btn-admin">Dinner</button>
             </div>
         </div>
 
-        <!-- DASHBOARD STATS -->
         <div class="stats-board">
             <div><span>Total Bazaar</span><br>৳<span id="totalBazaar">0</span></div>
             <div><span>Total Utility</span><br>৳<span id="totalUtility">0</span></div>
             <div><span>Meal Rate</span><br>৳<span id="mealRate">0.00</span></div>
         </div>
 
-        <!-- INPUT SECTION -->
         <div class="grid">
             <div class="card">
                 <h4>Add Expense</h4>
@@ -81,7 +81,7 @@
                 </div>
             </div>
             <div class="card">
-                <h4>My Meals</h4>
+                <h4>Self Meal Entry</h4>
                 <input type="number" id="mealQty" step="0.25" value="1">
                 <div style="display:flex; gap:10px;">
                     <button id="lunchBtn" class="btn-meal">Lunch</button>
@@ -90,9 +90,8 @@
             </div>
         </div>
 
-        <!-- SEPARATED LEDGER -->
         <div class="card">
-            <h4>Activity Ledger</h4>
+            <h4>Today's Activity Ledger</h4>
             <div class="ledger-container">
                 <div class="ledger-col">
                     <h5 style="color: var(--success);">🍲 Meals</h5>
@@ -109,7 +108,6 @@
             </div>
         </div>
 
-        <!-- SUMMARY REPORT -->
         <div class="card">
             <div style="display:flex; justify-content: space-between; align-items: center;">
                 <h4>Monthly Summary</h4>
@@ -140,7 +138,7 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        const ADMIN_UID = "1qVj4SXnRvXFgXrVi0rZmpJZjJv1"; // Boss's ID
+        const ADMIN_UID = "1qVj4SXnRvXFgXrVi0rZmpJZjJv1";
 
         const getEmail = () => document.getElementById('userName').value.trim().toLowerCase() + "@hostel.me";
         document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, getEmail(), document.getElementById('password').value).catch(e => alert("Login Failed"));
@@ -148,25 +146,15 @@
         document.getElementById('logoutBtn').onclick = () => signOut(auth);
 
         onAuthStateChanged(auth, (user) => {
-            const authSec = document.getElementById('authSection');
-            const appSec = document.getElementById('appSection');
-            const bossPanel = document.getElementById('bossPanel');
-            
             if (user) {
-                authSec.classList.add('hidden');
-                appSec.classList.remove('hidden');
+                document.getElementById('authSection').classList.add('hidden');
+                document.getElementById('appSection').classList.remove('hidden');
                 document.getElementById('displayName').innerText = user.email.split('@')[0].toUpperCase();
-                
-                // STRICT ADMIN CHECK
-                if (user.uid === ADMIN_UID) {
-                    bossPanel.classList.remove('hidden');
-                } else {
-                    bossPanel.classList.add('hidden');
-                }
+                if (user.uid === ADMIN_UID) document.getElementById('bossPanel').classList.remove('hidden');
                 runApp(user);
             } else {
-                authSec.classList.remove('hidden');
-                appSec.classList.add('hidden');
+                document.getElementById('authSection').classList.remove('hidden');
+                document.getElementById('appSection').classList.add('hidden');
             }
         });
 
@@ -174,32 +162,32 @@
             const q = query(collection(db, "transactions"), orderBy("timestamp", "desc"));
             onSnapshot(q, (snapshot) => {
                 let bazaar = 0, utility = 0, totalMeals = 0, members = {};
-                const mList = document.getElementById('mealList');
-                const bList = document.getElementById('bazaarList');
-                const uList = document.getElementById('utilityList');
+                const mList = document.getElementById('mealList'), bList = document.getElementById('bazaarList'), uList = document.getElementById('utilityList');
                 mList.innerHTML = ''; bList.innerHTML = ''; uList.innerHTML = '';
+                const todayStr = new Date().toLocaleDateString();
 
                 snapshot.forEach(d => {
                     const data = d.data();
                     if (!data.timestamp) return;
-                    const date = data.timestamp.toDate().toLocaleDateString();
+                    const logDate = data.timestamp.toDate().toLocaleDateString();
+                    const logTime = data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                     
                     if (!members[data.name]) members[data.name] = { paid: 0, ate: 0 };
-
                     const delBtn = (user.uid === ADMIN_UID || data.uid === user.uid) ? `<button class="btn-danger" onclick="deleteEntry('${d.id}')">X</button>` : '';
-                    const itemHTML = `<div class="list-item"><span><b>${data.name}</b>: ${data.item || data.meals}</span> <span>${delBtn}</span></div>`;
 
                     if (data.type === "meal") {
                         totalMeals += Number(data.meals);
                         members[data.name].ate += Number(data.meals);
-                        mList.innerHTML += itemHTML;
+                        if (logDate === todayStr) {
+                            mList.innerHTML += `<div class="list-item"><span><b>${data.name}</b>: ${data.mealType} ${data.meals}<span class="timestamp-label">${logTime}</span></span> ${delBtn}</div>`;
+                        }
                     } else if (data.type === "bazaar") {
                         bazaar += data.amount;
                         members[data.name].paid += data.amount;
-                        bList.innerHTML += itemHTML.replace(data.meals, "৳" + data.amount);
+                        if (logDate === todayStr) bList.innerHTML += `<div class="list-item"><span><b>${data.name}</b>: ${data.item} (৳${data.amount})<span class="timestamp-label">${logTime}</span></span> ${delBtn}</div>`;
                     } else if (data.type === "utility") {
                         utility += data.amount;
-                        uList.innerHTML += itemHTML.replace(data.meals, "৳" + data.amount);
+                        if (logDate === todayStr) uList.innerHTML += `<div class="list-item"><span><b>${data.name}</b>: ${data.item} (৳${data.amount})<span class="timestamp-label">${logTime}</span></span> ${delBtn}</div>`;
                     }
                 });
 
@@ -222,23 +210,16 @@
         }
 
         window.deleteEntry = async (id) => await deleteDoc(doc(db, "transactions", id));
-
         const logExpense = async (type) => {
-            const item = document.getElementById('expItem').value;
-            const amt = Number(document.getElementById('expAmount').value);
-            if(item && amt > 0) {
-                await addDoc(collection(db, "transactions"), { type: type, name: auth.currentUser.email.split('@')[0], uid: auth.currentUser.uid, item: item, amount: amt, timestamp: serverTimestamp() });
-                document.getElementById('expItem').value = ''; document.getElementById('expAmount').value = '';
-            }
+            const item = document.getElementById('expItem').value, amt = Number(document.getElementById('expAmount').value);
+            if(item && amt > 0) { await addDoc(collection(db, "transactions"), { type, name: auth.currentUser.email.split('@')[0], uid: auth.currentUser.uid, item, amount: amt, timestamp: serverTimestamp() }); document.getElementById('expItem').value = ''; document.getElementById('expAmount').value = ''; }
         };
         document.getElementById('addBazaarBtn').onclick = () => logExpense('bazaar');
         document.getElementById('addUtilityBtn').onclick = () => logExpense('utility');
 
         const logMeal = async (type, uName = null, uId = null) => {
             const qty = Number(document.getElementById(uName ? 'adminMealQty' : 'mealQty').value);
-            if(qty > 0) {
-                await addDoc(collection(db, "transactions"), { type: "meal", mealType: type, name: uName || auth.currentUser.email.split('@')[0], uid: uId || auth.currentUser.uid, meals: qty, timestamp: serverTimestamp() });
-            }
+            if(qty > 0) { await addDoc(collection(db, "transactions"), { type: "meal", mealType: type, name: uName || auth.currentUser.email.split('@')[0], uid: uId || auth.currentUser.uid, meals: qty, timestamp: serverTimestamp() }); }
         };
         document.getElementById('lunchBtn').onclick = () => logMeal('Lunch');
         document.getElementById('dinnerBtn').onclick = () => logMeal('Dinner');
