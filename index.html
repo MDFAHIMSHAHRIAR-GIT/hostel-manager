@@ -27,7 +27,7 @@
 <body class="bg-slate-50 text-slate-900 pb-32">
 
     <!-- LOADING OVERLAY -->
-    <div id="loadingOverlay" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center">
+    <div id="loadingOverlay" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center transition-opacity duration-500">
         <div class="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
         <p class="mt-4 text-slate-400 font-bold text-xs uppercase tracking-widest">Securing Connection...</p>
     </div>
@@ -105,6 +105,7 @@
         </header>
 
         <main id="viewContainer">
+            <!-- HOME VIEW -->
             <section id="view-home" class="view px-5 mt-6 animate-fade-in">
                 <div class="grid grid-cols-4 gap-2.5">
                     <button onclick="toggleModal('activeMealsModal')" class="apple-gradient p-3 rounded-2xl border border-white/50 text-center shadow-lg active:scale-95">
@@ -185,6 +186,7 @@
             </section>
         </main>
 
+        <!-- NAVIGATION -->
         <nav class="fixed bottom-6 left-5 right-5 h-20 bg-slate-900/95 rounded-[40px] shadow-2xl flex items-center justify-between px-6 z-50 border border-slate-800 backdrop-blur-lg">
             <button onclick="nav('home')" id="nav-home" class="p-3 rounded-full text-white bg-slate-800"><i data-lucide="utensils" class="w-5 h-5"></i></button>
             <button onclick="nav('history')" id="nav-history" class="p-3 rounded-full text-slate-500"><i data-lucide="history" class="w-5 h-5"></i></button>
@@ -204,22 +206,63 @@
         </div>
     </div>
 
-    <!-- Firebase Scripts -->
+    <div id="routineModal" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-[32px] p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-6"><h3 class="font-black text-lg uppercase">Edit Menu</h3><button onclick="toggleModal('routineModal')"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+            <div class="space-y-4">
+                <select id="rotDay" onchange="loadDayMenu()" class="input-box">
+                    <option value="Sat">Saturday</option><option value="Sun">Sunday</option><option value="Mon">Monday</option><option value="Tue">Tuesday</option><option value="Wed">Wednesday</option><option value="Thu">Thursday</option><option value="Fri">Friday</option>
+                </select>
+                <input type="text" id="rotL" placeholder="Lunch" class="input-box" />
+                <input type="text" id="rotD" placeholder="Dinner" class="input-box" />
+                <button onclick="updateRoutine()" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl text-xs uppercase tracking-widest">Update Day</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="logModal" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-[32px] p-8 shadow-2xl">
+            <div class="flex justify-between items-center mb-6"><h3 class="font-black text-xl uppercase tracking-tighter">New Entry</h3><button onclick="toggleModal('logModal')"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+            <div class="space-y-4">
+                <input type="text" id="itemName" placeholder="Item Name" class="input-box" />
+                <div class="flex gap-2">
+                    <input type="number" id="itemPrice" placeholder="Amount (৳)" class="input-box flex-1" />
+                    <select id="itemType" class="input-box w-1/3 tracking-tighter"><option>Bazaar</option><option>Utility</option></select>
+                </div>
+                <button onclick="submitLog()" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-lg text-xs uppercase tracking-widest">Confirm Log</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="activeMealsModal" class="fixed inset-0 z-[110] hidden flex items-end justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-[32px] p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-6"><h3 class="font-bold text-lg">Daily Breakdown</h3><button onclick="toggleModal('activeMealsModal')"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+            <div id="activeMealsItems" class="space-y-3 max-h-[50vh] overflow-y-auto pr-1"></div>
+        </div>
+    </div>
+
+    <div id="notifyModal" class="fixed inset-0 z-[110] hidden flex items-start justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-[32px] mt-20 p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-6"><h3 class="font-bold text-lg">Alerts</h3><button onclick="toggleModal('notifyModal')"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+            <div id="notifList" class="space-y-4"></div>
+        </div>
+    </div>
+
+    <!-- Firebase Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, addDoc, serverTimestamp, getDocs, updateDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // CONFIGURATION
-        // If uploading to your live site, replace the empty string with your real Firebase Config object!
-        const liveFirebaseConfig = null; // PASTE YOUR FIREBASE CONFIG HERE ON LIVE SITE
+        // IMPORTANT: REPLACE THIS OBJECT WITH YOUR ACTUAL FIREBASE CONFIG FROM FIREBASE CONSOLE
+        const liveFirebaseConfig = null; 
 
+        // Environment variables or local config
         const firebaseConfig = liveFirebaseConfig || (typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'hostel-pro-v1';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'hostel-pro-gh-pages';
         
         if (!firebaseConfig) {
-            console.error("Missing Firebase Configuration!");
-            document.getElementById('loadingOverlay').innerHTML = `<p class="p-6 text-center text-rose-500 font-bold">Error: Firebase Config Missing.<br>Check code comments.</p>`;
+            document.getElementById('loadingOverlay').innerHTML = `<p class="p-6 text-center text-rose-500 font-bold">Error: Firebase Configuration Missing.<br><span class="text-slate-400 font-medium">Please add your config object in the code.</span></p>`;
         }
 
         const app = initializeApp(firebaseConfig);
@@ -236,58 +279,71 @@
             { day: 'Fri', lunch: 'Chicken/Special', dinner: 'Fish' }
         ];
 
-        // --- AUTH INITIALIZATION ---
+        // --- AUTHENTICATION INIT ---
+        const hideLoader = () => {
+            const loader = document.getElementById('loadingOverlay');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.classList.add('hidden'), 500);
+            }
+        };
+
         const initAuth = async () => {
             try {
-                // Anonymous sign-in for real-time ID checks before user logs in
+                // Perform initial anonymous sign-in to allow ID checks before user logs in
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
                 }
             } catch (error) {
-                console.error("Connection failed:", error);
+                console.error("Auth init error:", error);
+                hideLoader(); // Force hide if something goes wrong
             }
         };
 
-        // UI View Logic
-        window.switchAuthView = (mode) => {
-            document.getElementById('view-login').classList.toggle('hidden', mode === 'signup');
-            document.getElementById('view-signup').classList.toggle('hidden', mode === 'login');
-            lucide.createIcons();
-        };
-
-        // --- ID AVAILABILITY CHECKER ---
+        // --- REAL-TIME ID CHECKER ---
         window.checkIdAvailability = async (uid) => {
+            const hint = document.getElementById('emailHint');
             const status = document.getElementById('availabilityStatus');
             const btn = document.getElementById('signupBtn');
             const cleanId = uid.trim().toLowerCase();
 
             if(!cleanId) {
                 status.innerHTML = '';
+                hint.innerHTML = 'Identity: <span class="text-indigo-500">...@gmail.com</span>';
                 btn.disabled = true;
                 btn.className = "w-full bg-slate-200 text-slate-400 font-black py-4 rounded-2xl shadow-lg cursor-not-allowed uppercase text-xs mt-2";
                 return;
             }
 
+            hint.innerHTML = `Identity: <span class="text-indigo-500">${cleanId}@gmail.com</span>`;
+
             try {
+                if (!auth.currentUser) return;
                 const membersRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
                 const q = await getDocs(membersRef);
                 const exists = q.docs.some(d => d.data().uid === cleanId);
 
                 if(exists) {
-                    status.innerHTML = `<span class="availability-badge bg-rose-100 text-rose-600">UserID Taken</span>`;
+                    status.innerHTML = `<span class="availability-badge bg-rose-100 text-rose-600">ID Taken / Not Available</span>`;
                     btn.disabled = true;
                     btn.className = "w-full bg-slate-200 text-slate-400 font-black py-4 rounded-2xl shadow-lg cursor-not-allowed uppercase text-xs mt-2";
                 } else {
-                    status.innerHTML = `<span class="availability-badge bg-emerald-100 text-emerald-600">Available</span>`;
+                    status.innerHTML = `<span class="availability-badge bg-emerald-100 text-emerald-600">UserID Available</span>`;
                     btn.disabled = false;
                     btn.className = "w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-transform uppercase text-xs mt-2";
                 }
             } catch (err) { console.error(err); }
         };
 
-        // --- HANDLERS ---
+        // UI Handlers
+        window.switchAuthView = (mode) => {
+            document.getElementById('view-login').classList.toggle('hidden', mode === 'signup');
+            document.getElementById('view-signup').classList.toggle('hidden', mode === 'login');
+            lucide.createIcons();
+        };
+
         window.handleLogin = async () => {
             const uid = document.getElementById('loginId').value.trim();
             const pass = document.getElementById('loginPass').value;
@@ -295,11 +351,15 @@
 
             const email = `${uid.toLowerCase()}@gmail.com`;
             try {
-                document.getElementById('loginBtn').innerText = "Verifying...";
+                const btn = document.getElementById('loginBtn');
+                btn.disabled = true;
+                btn.innerText = "Verifying...";
                 await signInWithEmailAndPassword(auth, email, pass);
             } catch(e) { 
-                alert("Login Error: Incorrect ID/Password or access restricted.");
-                document.getElementById('loginBtn').innerText = "Sign In";
+                alert("Login failed. Check ID/Pass or contact Manager."); 
+                const btn = document.getElementById('loginBtn');
+                btn.disabled = false;
+                btn.innerText = "Sign In";
             }
         };
 
@@ -315,7 +375,9 @@
 
             try {
                 const cred = await createUserWithEmailAndPassword(auth, email, pass);
-                let role = (fullId === 'fahim-admin' || fullId === 'fahim-manager') ? 'Manager' : 'Roommate';
+                let role = 'Roommate';
+                // Super Admin Logic
+                if(fullId === 'fahim-admin' || fullId === 'fahim-manager') role = 'Manager';
 
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', cred.user.uid), {
                     id: cred.user.uid,
@@ -332,10 +394,10 @@
 
         window.handleLogout = () => signOut(auth);
 
-        // --- STATE LISTENER ---
+        // --- AUTH LISTENER ---
         onAuthStateChanged(auth, async (u) => {
-            document.getElementById('loadingOverlay').classList.add('hidden');
-            
+            hideLoader();
+
             if(u && !u.isAnonymous) {
                 const d = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u.uid));
                 if(d.exists()) {
@@ -350,14 +412,17 @@
             } else {
                 document.getElementById('appWrapper').classList.add('hidden');
                 if (document.getElementById('view-signup').classList.contains('hidden')) {
+                    document.getElementById('view-login').classList.add('hidden');
+                } else {
                     document.getElementById('view-login').classList.remove('hidden');
                 }
             }
             lucide.createIcons();
         });
 
-        // --- SYNC ---
+        // --- DATA SYNC ---
         function startSync() {
+            if (!auth.currentUser || auth.currentUser.isAnonymous) return;
             document.getElementById('userDisplayName').innerText = user.name;
             document.getElementById('userDisplayRole').innerText = user.role;
             document.getElementById('todayDisplay').innerText = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
@@ -374,7 +439,9 @@
             });
 
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'routine'), (s) => {
-                if(s.empty) defaultRoutine.forEach(r => setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'routine', r.day), r));
+                if(s.empty) {
+                    defaultRoutine.forEach(r => setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'routine', r.day), r));
+                }
                 routine = s.docs.map(doc => doc.data());
                 renderRoutine();
             });
@@ -385,7 +452,7 @@
             });
         }
 
-        // --- RENDERERS (Core UI) ---
+        // --- RENDERING LOGIC ---
         function renderHome() {
             const list = document.getElementById('mealMgmtItems');
             if(!members.length) return;
@@ -402,21 +469,21 @@
                 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
                     <div class="flex justify-between items-center mb-3 font-bold text-sm text-slate-700">${m.name}</div>
                     <div class="grid grid-cols-2 gap-3">
-                        ${mealBlock(m, 'l', lLocked)}
-                        ${mealBlock(m, 'd', dLocked)}
+                        ${mealTemplate(m, 'l', lLocked)}
+                        ${mealTemplate(m, 'd', dLocked)}
                     </div>
                 </div>
             `).join('');
             lucide.createIcons();
         }
 
-        function mealBlock(m, t, locked) {
-            const active = t === 'l' ? m.lActive : m.dActive;
-            const q = t === 'l' ? m.lunchQty : m.dinnerQty;
+        function mealTemplate(m, type, locked) {
+            const active = type === 'l' ? m.lActive : m.dActive;
+            const qty = type === 'l' ? m.lunchQty : m.dinnerQty;
             return `
                 <div class="p-3 rounded-xl flex justify-between items-center border ${active ? 'bg-blue-50/50 border-blue-100' : 'bg-slate-50 opacity-40'} ${locked ? 'locked-meal' : ''}">
                     <i data-lucide="${locked ? 'lock' : 'power'}" class="w-3 h-3 text-blue-600"></i>
-                    <span class="text-sm font-black">${active ? q.toFixed(2) : 'OFF'}</span>
+                    <span class="text-sm font-black">${active ? qty.toFixed(2) : 'OFF'}</span>
                     <div class="flex flex-col gap-1"><i data-lucide="plus" class="w-3 h-3 text-emerald-500"></i><i data-lucide="minus" class="w-3 h-3 text-rose-500"></i></div>
                 </div>
             `;
@@ -426,7 +493,6 @@
             const al = members.reduce((a,b) => a + (b.lActive ? b.lunchQty : 0), 0);
             const ad = members.reduce((a,b) => a + (b.dActive ? b.dinnerQty : 0), 0);
             document.getElementById('activeCounts').innerText = `L:${al} | D:${ad}`;
-            // Summary Update
             const me = members.find(m => m.id === auth.currentUser.uid);
             if(me) {
                 document.getElementById('myMeals').innerText = (me.meals || 0).toFixed(1);
@@ -450,8 +516,8 @@
 
         function renderMembers() {
             document.getElementById('directoryItems').innerHTML = members.map(m => `
-                <div class="bg-white rounded-[24px] p-5 border shadow-sm flex items-center gap-4">
-                    <div class="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center font-black text-indigo-300">${(m.uid || '?')[0].toUpperCase()}</div>
+                <div onclick="showDetail('${m.id}')" class="bg-white rounded-[24px] p-5 border shadow-sm flex items-center gap-4 active:scale-95 transition-all cursor-pointer">
+                    <div class="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center font-black text-indigo-300 text-lg">${(m.uid || '?')[0].toUpperCase()}</div>
                     <div class="flex-1"><h4 class="font-bold text-slate-800">${m.name}</h4><p class="text-[10px] text-slate-400 font-bold uppercase">${m.uid}</p></div>
                     <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300"></i>
                 </div>
@@ -459,16 +525,40 @@
             lucide.createIcons();
         }
 
-        // NAVIGATION
+        // --- UI HELPERS ---
         window.nav = (v) => {
             document.querySelectorAll('.view').forEach(x => x.classList.add('hidden'));
             document.getElementById(`view-${v}`).classList.remove('hidden');
-            ['home','history','members'].forEach(x => document.getElementById(`nav-${x}`).className = (x === v) ? "p-3 rounded-full text-white bg-slate-800" : "p-3 rounded-full text-slate-500");
+            ['home','history','members'].forEach(x => {
+                document.getElementById(`nav-${x}`).className = (x === v) ? "p-3 rounded-full text-white bg-slate-800" : "p-3 rounded-full text-slate-500";
+            });
             lucide.createIcons();
         };
 
         window.toggleModal = (id) => document.getElementById(id).classList.toggle('hidden');
-        window.saveDaily = () => alert("Saved to database!");
+        window.saveDaily = () => alert("Daily logic committed to database.");
+        
+        window.hideDetail = () => {
+            document.getElementById('memberList').classList.remove('hidden');
+            document.getElementById('memberDetail').classList.add('hidden');
+        };
+
+        window.showDetail = (id) => {
+            const m = members.find(x => x.id === id);
+            const isManager = user.role === 'Manager' && user.id !== m.id;
+            document.getElementById('profileCardContent').innerHTML = `
+                <div class="bg-white rounded-[40px] p-8 shadow-sm border text-center">
+                    <div class="w-24 h-24 bg-indigo-50 rounded-full mx-auto mb-4 flex items-center justify-center font-black text-3xl text-indigo-300">${(m.uid || '?')[0].toUpperCase()}</div>
+                    <h2 class="text-xl font-black text-slate-800">${m.name}</h2>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">${m.role}</p>
+                    <div class="bg-slate-50 p-4 rounded-2xl border text-sm font-bold text-slate-700 mb-4">${m.email}</div>
+                    ${isManager ? `<button class="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl text-xs uppercase mb-2">Promote to Manager</button>` : ''}
+                </div>
+            `;
+            document.getElementById('memberList').classList.add('hidden');
+            document.getElementById('memberDetail').classList.remove('hidden');
+            lucide.createIcons();
+        };
 
         initAuth();
     </script>
