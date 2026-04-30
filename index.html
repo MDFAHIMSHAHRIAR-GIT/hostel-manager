@@ -59,7 +59,7 @@
                 </div>
                 <div class="relative">
                     <input type="text" id="regId" oninput="checkIdAvailability(this.value)" placeholder="Choose User ID" class="input-box" />
-                    <p id="emailHint" class="text-[10px] font-bold text-slate-400 ml-2 mt-2">Identity: <span class="text-indigo-500">...@gmail.com</span></p>
+                    <p id="emailHint" class="text-[10px] font-bold text-slate-400 ml-2 mt-2">Identity: <span id="identitySpan" class="text-indigo-500">...@gmail.com</span></p>
                     <div id="availabilityStatus"></div>
                 </div>
                 <input type="password" id="regPass" placeholder="Password" class="input-box" />
@@ -163,8 +163,6 @@
 
         <nav class="fixed bottom-6 left-5 right-5 h-20 bg-slate-900/95 rounded-[40px] shadow-2xl flex items-center justify-between px-6 z-50 border border-slate-800 backdrop-blur-lg">
             <button onclick="nav('home')" id="nav-home" class="p-3 rounded-full text-white bg-slate-800 shadow-xl"><i data-lucide="utensils" class="w-5 h-5"></i></button>
-            <button onclick="nav('history')" id="nav-history" class="p-3 rounded-full text-slate-500"><i data-lucide="history" class="w-5 h-5"></i></button>
-            <button id="addLogBtn" onclick="toggleModal('logModal')" class="bg-indigo-600 text-white p-4 rounded-full -mt-12 shadow-lg border-4 border-slate-50 active:scale-90"><i data-lucide="plus" class="w-6 h-6 stroke-[3]"></i></button>
             <button onclick="nav('members')" id="nav-members" class="p-3 rounded-full text-slate-500"><i data-lucide="users" class="w-5 h-5"></i></button>
             <button onclick="handleLogout()" class="p-3 rounded-full text-rose-400"><i data-lucide="log-out" class="w-5 h-5"></i></button>
         </nav>
@@ -242,22 +240,38 @@
         window.checkIdAvailability = async (uid) => {
             const status = document.getElementById('availabilityStatus');
             const btn = document.getElementById('signupBtn');
-            const cleanId = uid.trim().toLowerCase();
-
+            const span = document.getElementById('identitySpan');
+            
+            // Clean User ID: strip trailing @gmail.com if typed
+            const cleanId = uid.trim().toLowerCase().replace('@gmail.com', '');
+            
             if(!cleanId) {
                 status.innerHTML = '';
                 btn.disabled = true;
+                span.innerText = "...@gmail.com";
                 return;
             }
+
+            span.innerText = `${cleanId}@gmail.com`;
 
             try {
                 if (!auth.currentUser) return;
                 const membersRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
                 const q = await getDocs(membersRef);
-                const exists = q.docs.some(d => d.data().uid === cleanId);
+                const exists = q.docs.some(d => (d.data().uid || '').toLowerCase() === cleanId);
+                
                 status.innerHTML = exists ? `<span class="availability-badge bg-rose-100 text-rose-600">ID Taken</span>` : `<span class="availability-badge bg-emerald-100 text-emerald-600">Available</span>`;
-                btn.disabled = exists;
-            } catch (err) { console.error(err); }
+                
+                // Form completion check
+                const f = document.getElementById('regFirst').value;
+                const l = document.getElementById('regLast').value;
+                const p = document.getElementById('regPass').value;
+                
+                btn.disabled = exists || !f || !l || !p;
+            } catch (err) { 
+                console.error("Checker error", err); 
+                btn.disabled = false; // Allow if checker fails to prevent lock
+            }
         };
 
         window.toggleAuthMode = () => {
@@ -270,7 +284,7 @@
         };
 
         window.handleLogin = async () => {
-            const uid = document.getElementById('loginId').value.trim();
+            const uid = document.getElementById('loginId').value.trim().replace('@gmail.com', '');
             const pass = document.getElementById('loginPass').value;
             if(!uid || !pass) return;
 
@@ -291,7 +305,7 @@
         window.handleSignup = async () => {
             const fname = document.getElementById('regFirst').value.trim();
             const lname = document.getElementById('regLast').value.trim();
-            const uid = document.getElementById('regId').value.trim();
+            const uid = document.getElementById('regId').value.trim().toLowerCase().replace('@gmail.com', '');
             const pass = document.getElementById('regPass').value;
 
             if(!fname || !uid || !pass) {
@@ -299,32 +313,30 @@
                 return;
             }
             
-            const fullId = uid.toLowerCase();
-            const email = `${fullId}@gmail.com`;
+            const email = `${uid}@gmail.com`;
 
             try {
                 const cred = await createUserWithEmailAndPassword(auth, email, pass);
-                // MD. Fahim Shahriar logic
-                let role = (fullId === 'fahim-admin' || fullId === 'fahim-manager' || cred.user.uid === ADMIN_UID) ? 'Manager' : 'Roommate';
+                // Admin logic
+                let role = (uid === 'fahim-admin' || uid === 'fahim-manager' || cred.user.uid === ADMIN_UID) ? 'Manager' : 'Roommate';
 
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', cred.user.uid), {
                     id: cred.user.uid,
                     name: `${fname} ${lname}`,
-                    uid: fullId,
+                    uid: uid,
                     role: role,
                     email: email,
                     meals: 0, grocery: 0, utility: 0, balance: 0,
                     lActive: true, dActive: true, lunchQty: 1, dinnerQty: 1,
                     isPendingReset: false
                 });
-            } catch(e) { alert("Registration Failed: " + e.message); }
+            } catch(e) { alert("Signup error: " + e.message); }
         };
 
         window.handleLogout = () => signOut(auth);
 
         // --- AUTH LISTENER ---
         onAuthStateChanged(auth, async (u) => {
-            // Safety: Ensure loader is hidden
             document.getElementById('loadingOverlay').classList.add('hidden');
             
             if(u && !u.isAnonymous) {
@@ -332,7 +344,7 @@
                     const d = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u.uid));
                     if(d.exists()) {
                         user = d.data();
-                        // Force role update for admin
+                        // Manager Force fix
                         if(u.uid === ADMIN_UID && user.role !== 'Manager') {
                             await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u.uid), { role: 'Manager' });
                             user.role = 'Manager';
@@ -341,16 +353,13 @@
                         document.getElementById('appWrapper').classList.remove('hidden');
                         startSync();
                     } else {
-                        // User exists in Auth but no profile in Firestore
                         document.getElementById('view-auth').classList.remove('hidden');
                         document.getElementById('appWrapper').classList.add('hidden');
                     }
                 } catch (e) {
-                    console.error("User fetch error:", e);
                     document.getElementById('view-auth').classList.remove('hidden');
                 }
             } else {
-                // Not logged in or just anonymous (handshake state)
                 document.getElementById('appWrapper').classList.add('hidden');
                 document.getElementById('view-auth').classList.remove('hidden');
             }
@@ -372,7 +381,7 @@
                 members = s.docs.map(doc => doc.data());
                 renderHome();
                 renderMembers();
-            }, (err) => console.error("Sync error:", err));
+            });
 
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'routine'), (s) => {
                 if(s.empty) {
