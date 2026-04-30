@@ -133,7 +133,7 @@
                         <h3 class="font-bold text-slate-600 flex items-center gap-2"><div class="w-1.5 h-5 bg-indigo-500 rounded-full"></div> Meal Routine</h3>
                         <button id="adminRoutineBtn" onclick="toggleModal('routineModal')" class="hidden text-indigo-500 p-2 bg-indigo-50 rounded-lg"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
                     </div>
-                    <div class="overflow-x-auto pb-2 scrollbar-hide flex gap-3" id="routineContent"></div>
+                    <div class="overflow-x-auto pb-2 scrollbar-hide flex gap-3" id="routineList"></div>
                 </div>
 
                 <div class="mt-8">
@@ -272,16 +272,22 @@
         // --- CORE MANDATORY INIT ---
         const initAuth = async () => {
             try {
+                // Perform initial anonymous sign in to establish connection
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
                 }
-                document.getElementById('loadingOverlay').classList.add('hidden');
-                lucide.createIcons();
+                
+                // Set a timeout to clear loading overlay even if it takes too long
+                setTimeout(() => {
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                }, 5000);
             } catch (error) {
                 console.error("Auth failed:", error);
-                alert("Security handshake failed. Please reload.");
+                // Fallback: show the login screen anyway
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                document.getElementById('view-login').classList.remove('hidden');
             }
         };
 
@@ -303,7 +309,6 @@
             hint.innerHTML = `Identity: <span class="text-indigo-500">${cleanId}@gmail.com</span>`;
 
             try {
-                if (!auth.currentUser) return;
                 const membersRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
                 const q = await getDocs(membersRef);
                 const exists = q.docs.some(d => d.data().uid === cleanId);
@@ -359,7 +364,6 @@
             try {
                 const cred = await createUserWithEmailAndPassword(auth, email, pass);
                 let role = 'Roommate';
-                // Super Admin/Manager bypass logic
                 if(fullId === 'fahim-admin' || fullId === 'fahim-manager') role = 'Manager';
 
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', cred.user.uid), {
@@ -399,7 +403,10 @@
         };
 
         onAuthStateChanged(auth, async (u) => {
-            // Check if it's a real user (not anonymous)
+            // Once auth state changes, we can hide the loader
+            document.getElementById('loadingOverlay').classList.add('hidden');
+            lucide.createIcons();
+
             if(u && !u.isAnonymous) {
                 const d = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u.uid));
                 if(d.exists()) {
@@ -414,9 +421,9 @@
                     }
                     startSync();
                 } else {
-                    // This happens if a user exists in Auth but not Firestore
                     document.getElementById('appWrapper').classList.add('hidden');
                     document.getElementById('view-login').classList.remove('hidden');
+                    document.getElementById('view-signup').classList.add('hidden');
                 }
             } else {
                 document.getElementById('appWrapper').classList.add('hidden');
@@ -427,7 +434,7 @@
 
         // --- DATABASE SYNC ---
         function startSync() {
-            if (!auth.currentUser) return;
+            if (!auth.currentUser || auth.currentUser.isAnonymous) return;
             document.getElementById('userDisplayName').innerText = user.name;
             document.getElementById('userDisplayRole').innerText = user.role;
             document.getElementById('todayDisplay').innerText = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
