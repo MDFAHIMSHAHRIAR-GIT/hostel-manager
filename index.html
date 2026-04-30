@@ -255,7 +255,7 @@
                 const membersRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
                 const q = await getDocs(membersRef);
                 const exists = q.docs.some(d => d.data().uid === cleanId);
-                status.innerHTML = exists ? `<span class="availability-badge bg-rose-100 text-rose-600">ID Taken</span>` : `<span class="availability-badge bg-emerald-100 text-emerald-600">ID Available</span>`;
+                status.innerHTML = exists ? `<span class="availability-badge bg-rose-100 text-rose-600">ID Taken</span>` : `<span class="availability-badge bg-emerald-100 text-emerald-600">Available</span>`;
                 btn.disabled = exists;
             } catch (err) { console.error(err); }
         };
@@ -294,12 +294,17 @@
             const uid = document.getElementById('regId').value.trim();
             const pass = document.getElementById('regPass').value;
 
-            if(!fname || !uid || !pass) return;
+            if(!fname || !uid || !pass) {
+                alert("Please fill in all fields.");
+                return;
+            }
+            
             const fullId = uid.toLowerCase();
             const email = `${fullId}@gmail.com`;
 
             try {
                 const cred = await createUserWithEmailAndPassword(auth, email, pass);
+                // MD. Fahim Shahriar logic
                 let role = (fullId === 'fahim-admin' || fullId === 'fahim-manager' || cred.user.uid === ADMIN_UID) ? 'Manager' : 'Roommate';
 
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', cred.user.uid), {
