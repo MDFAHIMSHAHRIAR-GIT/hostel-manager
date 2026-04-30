@@ -25,8 +25,14 @@
 </head>
 <body class="bg-slate-50 text-slate-900 pb-32">
 
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center">
+        <div class="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+        <p class="mt-4 text-slate-400 font-bold text-xs uppercase tracking-widest">Securing Connection...</p>
+    </div>
+
     <!-- LOGIN VIEW -->
-    <section id="view-login" class="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-[#dceefb] to-[#a7d8f0]">
+    <section id="view-login" class="min-h-screen hidden flex items-center justify-center p-6 bg-gradient-to-br from-[#dceefb] to-[#a7d8f0]">
         <div class="bg-white w-full max-w-sm rounded-[40px] p-8 shadow-2xl animate-slide-up">
             <div class="text-center mb-8">
                 <div class="w-16 h-16 bg-indigo-600 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white shadow-lg">
@@ -38,7 +44,7 @@
             <div class="space-y-4">
                 <input type="text" id="loginId" placeholder="User ID" class="input-box" />
                 <input type="password" id="loginPass" placeholder="Password" class="input-box" />
-                <button onclick="handleLogin()" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-transform uppercase tracking-widest text-xs mt-2">Sign In</button>
+                <button onclick="handleLogin()" id="loginBtn" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-transform uppercase tracking-widest text-xs mt-2">Sign In</button>
                 <div class="flex flex-col gap-3 mt-4 text-center">
                     <button onclick="switchAuthView('signup')" class="text-indigo-600 font-bold text-[10px] uppercase tracking-widest">New Member? Create Account</button>
                     <button onclick="toggleModal('forgotPassModal')" class="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Forgot Password?</button>
@@ -75,7 +81,7 @@
         </div>
     </section>
 
-    <!-- MAIN APP WRAPPER (HIDDEN) -->
+    <!-- MAIN APP WRAPPER -->
     <div id="appWrapper" class="hidden">
         <header id="mainHeader" class="bg-gradient-to-br from-[#dceefb] to-[#a7d8f0] p-6 pt-12 rounded-b-[40px] shadow-lg border-b border-white/20">
             <div class="flex justify-between items-start mb-6">
@@ -155,7 +161,7 @@
             <!-- HISTORY VIEW -->
             <section id="view-history" class="view hidden p-5 animate-slide-up">
                 <div class="flex gap-2 mb-6">
-                    <button onclick="switchTab('meal')" id="tab-meal" class="flex-1 py-3 rounded-2xl text-xs font-bold bg-indigo-600 text-white">Meal</button>
+                    <button onclick="switchTab('meal')" id="tab-meal" class="flex-1 py-3 rounded-2xl text-xs font-bold transition-all bg-indigo-600 text-white">Meal</button>
                     <button onclick="switchTab('grocery')" id="tab-grocery" class="flex-1 py-3 rounded-2xl text-xs font-bold bg-white text-slate-500 border">Grocery</button>
                     <button onclick="switchTab('utility')" id="tab-utility" class="flex-1 py-3 rounded-2xl text-xs font-bold bg-white text-slate-500 border">Utility</button>
                 </div>
@@ -242,12 +248,14 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, addDoc, serverTimestamp, getDocs, updateDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const config = JSON.parse(__firebase_config);
+        // Global placeholders provided by environment
+        const firebaseConfig = JSON.parse(__firebase_config);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'hostel-pro-elite';
-        const app = initializeApp(config);
+        
+        const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
@@ -260,6 +268,22 @@
             { day: 'Wed', lunch: 'Chicken', dinner: 'Fish' }, { day: 'Thu', lunch: 'Egg + Veg', dinner: 'Chicken' },
             { day: 'Fri', lunch: 'Chicken/Special', dinner: 'Fish' }
         ];
+
+        // --- CORE MANDATORY INIT ---
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                lucide.createIcons();
+            } catch (error) {
+                console.error("Auth failed:", error);
+                alert("Security handshake failed. Please reload.");
+            }
+        };
 
         // --- REAL-TIME UID CHECKER ---
         window.checkIdAvailability = async (uid) => {
@@ -278,18 +302,23 @@
 
             hint.innerHTML = `Identity: <span class="text-indigo-500">${cleanId}@gmail.com</span>`;
 
-            const membersRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
-            const q = await getDocs(membersRef);
-            const exists = q.docs.some(d => d.data().uid === cleanId);
+            try {
+                if (!auth.currentUser) return;
+                const membersRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
+                const q = await getDocs(membersRef);
+                const exists = q.docs.some(d => d.data().uid === cleanId);
 
-            if(exists) {
-                status.innerHTML = `<span class="availability-badge bg-rose-100 text-rose-600">ID Taken / Not Available</span>`;
-                btn.disabled = true;
-                btn.className = "w-full bg-slate-200 text-slate-400 font-black py-4 rounded-2xl shadow-lg cursor-not-allowed uppercase tracking-widest text-xs mt-2";
-            } else {
-                status.innerHTML = `<span class="availability-badge bg-emerald-100 text-emerald-600">UserID Available</span>`;
-                btn.disabled = false;
-                btn.className = "w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-transform uppercase tracking-widest text-xs mt-2";
+                if(exists) {
+                    status.innerHTML = `<span class="availability-badge bg-rose-100 text-rose-600">ID Taken / Not Available</span>`;
+                    btn.disabled = true;
+                    btn.className = "w-full bg-slate-200 text-slate-400 font-black py-4 rounded-2xl shadow-lg cursor-not-allowed uppercase tracking-widest text-xs mt-2";
+                } else {
+                    status.innerHTML = `<span class="availability-badge bg-emerald-100 text-emerald-600">UserID Available</span>`;
+                    btn.disabled = false;
+                    btn.className = "w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-transform uppercase tracking-widest text-xs mt-2";
+                }
+            } catch (err) {
+                console.error(err);
             }
         };
 
@@ -307,8 +336,14 @@
 
             const email = `${uid.toLowerCase()}@gmail.com`;
             try {
+                document.getElementById('loginBtn').disabled = true;
+                document.getElementById('loginBtn').innerText = "Verifying...";
                 await signInWithEmailAndPassword(auth, email, pass);
-            } catch(e) { alert("Login failed. Check ID/Pass or contact Manager."); }
+            } catch(e) { 
+                alert("Login failed. Check ID/Pass or contact Manager."); 
+                document.getElementById('loginBtn').disabled = false;
+                document.getElementById('loginBtn').innerText = "Sign In";
+            }
         };
 
         window.handleSignup = async () => {
@@ -324,6 +359,7 @@
             try {
                 const cred = await createUserWithEmailAndPassword(auth, email, pass);
                 let role = 'Roommate';
+                // Super Admin/Manager bypass logic
                 if(fullId === 'fahim-admin' || fullId === 'fahim-manager') role = 'Manager';
 
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', cred.user.uid), {
@@ -346,20 +382,25 @@
             if(!uid) return;
             const fullId = uid.toLowerCase();
             
-            const q = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'members'));
-            const uDoc = q.docs.find(d => d.data().uid === fullId);
-            
-            if(uDoc) {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'requests'), {
-                    uid: fullId, userId: uDoc.id, type: 'Password Reset', at: Date.now()
-                });
-                alert("Request sent. Access will be restricted until Manager approval.");
-                toggleModal('forgotPassModal');
-            } else { alert("ID not found."); }
+            try {
+                const q = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'members'));
+                const uDoc = q.docs.find(d => d.data().uid === fullId);
+                
+                if(uDoc) {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'requests'), {
+                        uid: fullId, userId: uDoc.id, type: 'Password Reset', at: Date.now()
+                    });
+                    alert("Request sent. Access will be restricted until Manager approval.");
+                    toggleModal('forgotPassModal');
+                } else { alert("ID not found."); }
+            } catch (err) {
+                console.error(err);
+            }
         };
 
         onAuthStateChanged(auth, async (u) => {
-            if(u) {
+            // Check if it's a real user (not anonymous)
+            if(u && !u.isAnonymous) {
                 const d = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u.uid));
                 if(d.exists()) {
                     user = d.data();
@@ -372,15 +413,21 @@
                         document.getElementById('cycleBar').classList.add('hidden');
                     }
                     startSync();
+                } else {
+                    // This happens if a user exists in Auth but not Firestore
+                    document.getElementById('appWrapper').classList.add('hidden');
+                    document.getElementById('view-login').classList.remove('hidden');
                 }
             } else {
                 document.getElementById('appWrapper').classList.add('hidden');
                 document.getElementById('view-login').classList.remove('hidden');
+                document.getElementById('view-signup').classList.add('hidden');
             }
         });
 
         // --- DATABASE SYNC ---
         function startSync() {
+            if (!auth.currentUser) return;
             document.getElementById('userDisplayName').innerText = user.name;
             document.getElementById('userDisplayRole').innerText = user.role;
             document.getElementById('todayDisplay').innerText = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
@@ -394,25 +441,25 @@
                 members = s.docs.map(doc => doc.data());
                 renderHome();
                 renderMembers();
-            });
+            }, (err) => console.error("Members sync error", err));
 
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'routine'), (s) => {
                 if(s.empty) defaultRoutine.forEach(r => setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'routine', r.day), r));
                 routine = s.docs.map(doc => doc.data());
                 renderRoutine();
-            });
+            }, (err) => console.error("Routine sync error", err));
 
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'logs'), (s) => {
                 logs = s.docs.map(doc => doc.data()).sort((a,b) => b.at - a.at);
                 renderStats();
                 renderNotifications();
-            });
+            }, (err) => console.error("Logs sync error", err));
 
             if(user.role === 'Manager') {
                 onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'requests'), (s) => {
                     requests = s.docs.map(doc => ({...doc.data(), id: doc.id}));
                     renderNotifications();
-                });
+                }, (err) => console.error("Requests sync error", err));
             }
         }
 
@@ -494,8 +541,8 @@
             box.innerHTML = sorted.map(r => `
                 <div class="p-4 rounded-2xl w-40 border border-slate-100 bg-white shadow-sm flex-shrink-0">
                     <span class="font-bold text-sm text-slate-800">${r.day}</span>
-                    <p class="text-[10px] text-slate-500 truncate mt-1">L: ${r.lunch}</p>
-                    <p class="text-[10px] text-slate-500 truncate">D: ${r.dinner}</p>
+                    <p class="text-[10px] text-slate-500 truncate mt-1">L: ${r.lunch || '-'}</p>
+                    <p class="text-[10px] text-slate-500 truncate">D: ${r.dinner || '-'}</p>
                 </div>
             `).join('');
         }
@@ -505,7 +552,7 @@
             list.innerHTML = members.map(m => `
                 <div onclick="showDetail('${m.id}')" class="bg-white rounded-[24px] p-5 border shadow-sm active:scale-95 transition-transform cursor-pointer">
                     <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center font-black text-indigo-300">${m.uid[0].toUpperCase()}</div>
+                        <div class="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center font-black text-indigo-300">${(m.uid || '?')[0].toUpperCase()}</div>
                         <div class="flex-1">
                             <h4 class="font-bold text-slate-800">${m.name}</h4>
                             <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">${m.uid}</p>
@@ -521,7 +568,7 @@
             const list = document.getElementById('notifList');
             const badge = document.getElementById('notifBadge');
             let html = '';
-            if(user.role === 'Manager' && requests.length > 0) {
+            if(user && user.role === 'Manager' && requests.length > 0) {
                 badge.classList.remove('hidden');
                 requests.forEach(r => {
                     html += `<div class="p-4 bg-amber-50 rounded-2xl border">
@@ -530,7 +577,7 @@
                 });
             } else { badge.classList.add('hidden'); }
             logs.slice(0, 5).forEach(l => {
-                html += `<div class="flex gap-3 border-b pb-3"><div class="flex-1"><p class="text-xs font-medium text-slate-700">${l.label} Logged</p><p class="text-[9px] text-slate-400">By ${l.by}</p></div></div>`;
+                html += `<div class="flex gap-3 border-b border-slate-50 pb-3"><div class="flex-1"><p class="text-xs font-medium text-slate-700">${l.label} Logged</p><p class="text-[9px] text-slate-400">By ${l.by}</p></div></div>`;
             });
             list.innerHTML = html || emptyDataHTML("No new alerts.");
             lucide.createIcons();
@@ -561,7 +608,7 @@
             const isManager = user.role === 'Manager' && user.uid !== m.uid;
             document.getElementById('profileCardContent').innerHTML = `
                 <div class="bg-white rounded-[40px] p-8 shadow-sm border text-center">
-                    <div class="w-24 h-24 bg-indigo-50 rounded-full mx-auto mb-4 flex items-center justify-center font-black text-3xl text-indigo-300">${m.uid[0].toUpperCase()}</div>
+                    <div class="w-24 h-24 bg-indigo-50 rounded-full mx-auto mb-4 flex items-center justify-center font-black text-3xl text-indigo-300">${(m.uid || '?')[0].toUpperCase()}</div>
                     <h2 class="text-xl font-black text-slate-800">${m.name}</h2>
                     <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">${m.role}</p>
                     <div class="bg-slate-50 p-4 rounded-2xl border text-sm font-bold text-slate-700 mb-4">${m.email}</div>
@@ -609,7 +656,7 @@
             document.getElementById('rotD').value = d ? d.dinner : '';
         };
 
-        window.onload = () => lucide.createIcons();
+        initAuth();
     </script>
 </body>
 </html>
