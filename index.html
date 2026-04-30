@@ -3,130 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hostel Manager | Boss Edition</title>
+    <title>Hostel Manager Pro | Boss Edition</title>
     <style>
-        :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --admin: #7c3aed; --utility: #ea580c; --bg: #f1f5f9; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; background: var(--bg); color: #1e293b; display: flex; flex-direction: column; min-height: 100vh; }
-        
-        /* PAGE 1: LOGIN BOX */
-        #loginPage { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .login-card { background: white; width: 100%; max-width: 400px; padding: 2rem; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
-        .login-card h2 { margin-bottom: 1.5rem; color: var(--primary); }
-
-        /* PAGE 2: DASHBOARD */
+        :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --admin: #7c3aed; --utility: #ea580c; --notice: #fef3c7; --members: #0ea5e9; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; background: #f1f5f9; color: #1e293b; min-height: 100vh; }
+        #loginPage { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
         #dashboardPage { display: none; padding: 15px; max-width: 1000px; margin: 0 auto; width: 100%; box-sizing: border-box; }
-        .nav { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        
-        /* COMPONENTS */
         .card { background: white; padding: 1.2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 1.2rem; }
         .admin-section { border: 2.5px solid var(--admin); background: #f5f3ff; }
+        .notice-board { background: var(--notice); border-left: 5px solid #d97706; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
         .flex-row { display: flex; gap: 10px; margin-top: 10px; }
-        
-        /* LEDGER COLUMNS */
         .ledger-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; }
         .col { background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; }
-        .col h5 { margin: 0 0 10px 0; text-align: center; padding-bottom: 5px; border-bottom: 2px solid #cbd5e0; }
-
-        /* INPUTS & BUTTONS */
-        input, button { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #cbd5e0; box-sizing: border-box; font-size: 14px; outline: none; }
+        .col h5 { margin: 0 0 10px 0; text-align: center; padding-bottom: 5px; border-bottom: 2px solid #cbd5e0; display: flex; justify-content: center; align-items: center; gap: 5px; }
+        .badge { background: var(--primary); color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; }
+        input, button, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #cbd5e0; box-sizing: border-box; font-size: 14px; outline: none; }
         button { background: var(--primary); color: white; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; }
         button:active { transform: scale(0.98); }
         .btn-meal { background: var(--success); }
         .btn-admin { background: var(--admin); }
         .btn-utility { background: var(--utility); }
         .btn-logout { background: #64748b; width: auto; padding: 8px 15px; }
-        .btn-del { background: var(--danger); width: auto; padding: 2px 8px; font-size: 10px; }
-
-        /* UI ELEMENTS */
-        .item { font-size: 0.85rem; padding: 8px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
-        .time { font-size: 0.7rem; color: #94a3b8; display: block; }
-        .stats { display: flex; justify-content: space-around; background: var(--primary); color: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center; }
+        .btn-del { background: var(--danger); width: auto; padding: 2px 8px; font-size: 10px; margin-left: 5px; }
+        .history-item { font-size: 0.85rem; padding: 8px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+        .date-label { font-size: 0.7rem; color: #64748b; font-weight: bold; margin-top: 10px; background: #e2e8f0; padding: 2px 8px; border-radius: 4px; display: inline-block; }
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; background: var(--primary); color: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center; font-size: 0.8rem;}
         .hidden { display: none !important; }
-
-        @media (max-width: 700px) { .ledger-grid { grid-template-columns: 1fr; } }
+        .member-chip { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; margin: 4px; border: 1px solid #bae6fd; }
+        @media (max-width: 700px) { .ledger-grid { grid-template-columns: 1fr; } .stats { grid-template-columns: 1fr 1fr; } }
     </style>
 </head>
 <body>
 
     <div id="loginPage">
-        <div class="login-card">
-            <h2>Hostel Entrance</h2>
-            <input type="text" id="user" placeholder="Username (e.g. fahim)">
+        <div class="card" style="max-width: 400px; width: 100%; text-align: center;">
+            <h2 style="color: var(--primary);">Hostel Entrance</h2>
+            <input type="text" id="user" placeholder="Username">
             <input type="password" id="pass" placeholder="Password">
             <button id="loginBtn">Sign In</button>
-            <button id="signupBtn" class="btn-meal">New Member? Join Us</button>
+            <button id="signupBtn" class="btn-meal">New Member? Sign Up</button>
         </div>
     </div>
 
     <div id="dashboardPage">
-        <div class="nav">
+        <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px;">
             <div><b>Boss:</b> <span id="displayUser"></span></div>
             <button id="logoutBtn" class="btn-logout">Logout</button>
         </div>
 
+        <div class="notice-board">
+            <h4 style="margin: 0 0 5px 0;">📢 Notice Board</h4>
+            <div id="noticeContent" style="font-size: 0.9rem; white-space: pre-wrap;">Loading notice...</div>
+            <div id="adminNoticeInput" class="hidden" style="margin-top: 10px;">
+                <textarea id="newNotice" placeholder="Write a new notice..." rows="2"></textarea>
+                <button id="postNotice" class="btn-admin" style="width: auto; padding: 5px 15px;">Post Notice</button>
+            </div>
+        </div>
+
         <div id="bossPanel" class="card admin-section hidden">
             <h4 style="margin:0 0 10px 0; color:var(--admin)">🛡️ Admin Master Control</h4>
-            <div class="flex-row">
-                <input type="text" id="target" placeholder="Whose meal? (username)">
-                <input type="number" id="admQty" step="0.25" value="1" style="width:80px">
-            </div>
-            <div class="flex-row">
-                <button id="admLunch" class="btn-admin">Lunch</button>
-                <button id="admDinner" class="btn-admin">Dinner</button>
-            </div>
+            <div class="flex-row"><input type="text" id="target" placeholder="Whose meal?"><input type="number" id="admQty" step="0.25" value="1" style="width:80px"></div>
+            <div class="flex-row"><button id="admLunch" class="btn-admin">Log Lunch</button><button id="admDinner" class="btn-admin">Log Dinner</button></div>
         </div>
 
         <div class="stats">
             <div>Bazaar<br>৳<span id="statBazaar">0</span></div>
             <div>Utility<br>৳<span id="statUtil">0</span></div>
             <div>Rate<br>৳<span id="statRate">0.00</span></div>
+            <div style="background: rgba(255,255,255,0.1); border-radius: 8px;">Members<br><span id="statMembers">0</span></div>
+        </div>
+
+        <div class="card">
+            <h4 style="margin-top:0">👥 Roommate Directory</h4>
+            <div id="memberDirectory" style="display: flex; flex-wrap: wrap;"></div>
         </div>
 
         <div class="grid">
             <div class="card">
-                <h4>Log Daily Meal</h4>
+                <h4>Self Meal Entry</h4>
                 <input type="number" id="myQty" step="0.25" value="1">
-                <div class="flex-row">
-                    <button id="btnLunch" class="btn-meal">Lunch</button>
-                    <button id="btnDinner" class="btn-meal">Dinner</button>
-                </div>
+                <div class="flex-row"><button id="btnLunch" class="btn-meal">Lunch</button><button id="btnDinner" class="btn-meal">Dinner</button></div>
             </div>
             <div class="card">
                 <h4>Log Expense</h4>
-                <input type="text" id="item" placeholder="What did you buy?">
-                <input type="number" id="amt" placeholder="Amount (৳)">
-                <div class="flex-row">
-                    <button id="btnBazaar">Bazaar</button>
-                    <button id="btnUtil" class="btn-utility">Utility</button>
-                </div>
+                <input type="text" id="item" placeholder="Item Name"><input type="number" id="amt" placeholder="Amount (৳)">
+                <div class="flex-row"><button id="btnBazaar">Bazaar</button><button id="btnUtil" class="btn-utility">Utility</button></div>
             </div>
         </div>
 
         <div class="card">
-            <h4>Today's Activity</h4>
+            <h4>Daily Activity Ledger</h4>
             <div class="ledger-grid">
-                <div class="col">
-                    <h5 style="color:var(--success)">Meals</h5>
-                    <div id="listMeals"></div>
-                </div>
-                <div class="col">
-                    <h5 style="color:var(--primary)">Bazaar</h5>
-                    <div id="listBazaar"></div>
-                </div>
-                <div class="col">
-                    <h5 style="color:var(--utility)">Utility</h5>
-                    <div id="listUtil"></div>
-                </div>
+                <div class="col"><h5 style="color:var(--success)">Meals <span id="countMeals" class="badge">0</span></h5><div id="listMeals"></div></div>
+                <div class="col"><h5 style="color:var(--primary)">Bazaar</h5><div id="listBazaar"></div></div>
+                <div class="col"><h5 style="color:var(--utility)">Utility</h5><div id="listUtil"></div></div>
             </div>
         </div>
 
+        <div class="card">
+            <h4>History & Archives</h4>
+            <div style="max-height: 250px; overflow-y: auto; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px;" id="fullHistory"></div>
+        </div>
+
         <div class="card" style="overflow-x:auto">
-            <h4>Monthly Ledger</h4>
+            <h4>Monthly Summary</h4>
             <table style="width:100%; border-collapse: collapse; font-size: 13px;">
-                <thead style="background:#f8fafc">
-                    <tr><th style="padding:8px; border:1px solid #ddd">Name</th><th style="padding:8px; border:1px solid #ddd">Paid</th><th style="padding:8px; border:1px solid #ddd">Meals</th><th style="padding:8px; border:1px solid #ddd">Cost</th><th style="padding:8px; border:1px solid #ddd">Balance</th></tr>
-                </thead>
+                <thead style="background:#f8fafc"><tr><th style="padding:8px; border:1px solid #ddd">Name</th><th style="padding:8px; border:1px solid #ddd">Paid</th><th style="padding:8px; border:1px solid #ddd">Meals</th><th style="padding:8px; border:1px solid #ddd">Cost</th><th style="padding:8px; border:1px solid #ddd">Balance</th></tr></thead>
                 <tbody id="summaryTable"></tbody>
             </table>
         </div>
@@ -134,7 +117,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -153,68 +136,91 @@
 
         const getEmail = () => document.getElementById('user').value.trim().toLowerCase() + "@mess.com";
 
-        // AUTH HANDLERS
-        document.getElementById('loginBtn').onclick = () => {
-            const p = document.getElementById('pass').value;
-            if(!p) return alert("Enter password, Boss!");
-            signInWithEmailAndPassword(auth, getEmail(), p).catch(e => alert("Wrong Credentials"));
-        };
-
-        document.getElementById('signupBtn').onclick = () => {
-            const p = document.getElementById('pass').value;
-            if(p.length < 6) return alert("Password must be 6+ chars");
-            createUserWithEmailAndPassword(auth, getEmail(), p).catch(e => alert(e.message));
+        document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, getEmail(), document.getElementById('pass').value).catch(e => alert("Login Error"));
+        
+        document.getElementById('signupBtn').onclick = async () => {
+            const username = document.getElementById('user').value.trim().toLowerCase();
+            const pass = document.getElementById('pass').value;
+            if(!username || pass.length < 6) return alert("Enter username & 6+ char password");
+            
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, username + "@mess.com", pass);
+                await setDoc(doc(db, "users", cred.user.uid), { name: username, joined: serverTimestamp() });
+            } catch (e) { alert(e.message); }
         };
 
         document.getElementById('logoutBtn').onclick = () => signOut(auth);
 
-        // ROUTING LOGIC (Single page switching)
         onAuthStateChanged(auth, (user) => {
             if(user) {
                 document.getElementById('loginPage').style.display = 'none';
                 document.getElementById('dashboardPage').style.display = 'block';
                 document.getElementById('displayUser').innerText = user.email.split('@')[0].toUpperCase();
-                if(user.uid === BOSS_ID) document.getElementById('bossPanel').classList.remove('hidden');
-                initData(user);
+                if(user.uid === BOSS_ID) {
+                    document.getElementById('bossPanel').classList.remove('hidden');
+                    document.getElementById('adminNoticeInput').classList.remove('hidden');
+                }
+                initApp(user);
             } else {
                 document.getElementById('loginPage').style.display = 'flex';
                 document.getElementById('dashboardPage').style.display = 'none';
             }
         });
 
-        function initData(currentUser) {
+        document.getElementById('postNotice').onclick = async () => {
+            const text = document.getElementById('newNotice').value;
+            if(text) await setDoc(doc(db, "settings", "notice"), { text });
+        };
+        onSnapshot(doc(db, "settings", "notice"), (s) => { if(s.exists()) document.getElementById('noticeContent').innerText = s.data().text; });
+
+        function initApp(currentUser) {
+            // Live Member Directory
+            onSnapshot(collection(db, "users"), (snap) => {
+                const dir = document.getElementById('memberDirectory');
+                dir.innerHTML = '';
+                document.getElementById('statMembers').innerText = snap.size;
+                snap.forEach(u => {
+                    dir.innerHTML += `<span class="member-chip">@${u.data().name}</span>`;
+                });
+            });
+
             const q = query(collection(db, "transactions"), orderBy("timestamp", "desc"));
             onSnapshot(q, (snap) => {
-                let bazaarTotal = 0, utilTotal = 0, mealCount = 0, members = {};
-                const mList = document.getElementById('listMeals'), bList = document.getElementById('listBazaar'), uList = document.getElementById('listUtil');
-                mList.innerHTML = ''; bList.innerHTML = ''; uList.innerHTML = '';
+                let bazaarTotal = 0, utilTotal = 0, mealTotal = 0, todayMeals = 0, members = {};
+                const mList = document.getElementById('listMeals'), bList = document.getElementById('listBazaar'), uList = document.getElementById('listUtil'), fullHist = document.getElementById('fullHistory');
+                mList.innerHTML = ''; bList.innerHTML = ''; uList.innerHTML = ''; fullHist.innerHTML = '';
                 const today = new Date().toLocaleDateString();
+                let lastDate = "";
 
                 snap.forEach(s => {
                     const d = s.data(); if(!d.timestamp) return;
                     const logDate = d.timestamp.toDate().toLocaleDateString();
                     const logTime = d.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                     if(!members[d.name]) members[d.name] = { paid:0, ate:0 };
+                    const del = (currentUser.uid === BOSS_ID || d.uid === currentUser.uid) ? `<button class="btn-del" onclick="delItem('${s.id}')">X</button>` : '';
 
-                    const del = (currentUser.uid === BOSS_ID || d.uid === currentUser.uid) ? `<button class="btn-del" onclick="removeEntry('${s.id}')">X</button>` : '';
+                    if(logDate !== lastDate) { fullHist.innerHTML += `<div class="date-label">${logDate}</div>`; lastDate = logDate; }
 
                     if(d.type === "meal") {
-                        mealCount += Number(d.qty);
-                        members[d.name].ate += Number(d.qty);
-                        if(logDate === today) mList.innerHTML += `<div class="item"><span><b>${d.name}</b>: ${d.mealType} ${d.qty}<span class="time">${logTime}</span></span>${del}</div>`;
-                    } else if(d.type === "bazaar") {
-                        bazaarTotal += d.amt; members[d.name].paid += d.amt;
-                        if(logDate === today) bList.innerHTML += `<div class="item"><span><b>${d.name}</b>: ${d.info} (৳${d.amt})<span class="time">${logTime}</span></span>${del}</div>`;
-                    } else if(d.type === "util") {
-                        utilTotal += d.amt;
-                        if(logDate === today) uList.innerHTML += `<div class="item"><span><b>${d.name}</b>: ${d.info} (৳${d.amt})<span class="time">${logTime}</span></span>${del}</div>`;
+                        mealTotal += Number(d.qty); members[d.name].ate += Number(d.qty);
+                        if(logDate === today) { todayMeals += Number(d.qty); mList.innerHTML += `<div class="history-item"><span><b>${d.name}</b>: ${d.mealType} ${d.qty}</span>${del}</div>`; }
+                        fullHist.innerHTML += `<div class="history-item"><span>${d.name}: ${d.mealType} ${d.qty}</span> <span class="badge" style="background:#64748b">${logTime}</span></div>`;
+                    } else {
+                        const icon = d.type === "bazaar" ? "🛒" : "💡";
+                        if(d.type === "bazaar") { bazaarTotal += d.amt; members[d.name].paid += d.amt; } else { utilTotal += d.amt; }
+                        if(logDate === today) {
+                            const target = d.type === "bazaar" ? bList : uList;
+                            target.innerHTML += `<div class="history-item"><span><b>${d.name}</b>: ${d.info} (৳${d.amt})</span>${del}</div>`;
+                        }
+                        fullHist.innerHTML += `<div class="history-item"><span>${icon} ${d.name}: ${d.info} (৳${d.amt})</span> <span class="badge" style="background:#64748b">${logTime}</span></div>`;
                     }
                 });
 
-                const rate = mealCount > 0 ? bazaarTotal / mealCount : 0;
+                const rate = mealTotal > 0 ? bazaarTotal / mealTotal : 0;
                 document.getElementById('statBazaar').innerText = bazaarTotal;
                 document.getElementById('statUtil').innerText = utilTotal;
                 document.getElementById('statRate').innerText = rate.toFixed(2);
+                document.getElementById('countMeals').innerText = todayMeals;
 
                 const table = document.getElementById('summaryTable'); table.innerHTML = '';
                 for(const name in members) {
@@ -224,17 +230,13 @@
             });
         }
 
-        window.removeEntry = async (id) => await deleteDoc(doc(db, "transactions", id));
-
+        window.delItem = async (id) => await deleteDoc(doc(db, "transactions", id));
         const post = async (data) => await addDoc(collection(db, "transactions"), { ...data, timestamp: serverTimestamp() });
 
-        // BUTTON ACTIONS
         document.getElementById('btnLunch').onclick = () => post({ type:"meal", mealType:"Lunch", name: auth.currentUser.email.split('@')[0], uid: auth.currentUser.uid, qty: Number(document.getElementById('myQty').value) });
         document.getElementById('btnDinner').onclick = () => post({ type:"meal", mealType:"Dinner", name: auth.currentUser.email.split('@')[0], uid: auth.currentUser.uid, qty: Number(document.getElementById('myQty').value) });
-        
         document.getElementById('admLunch').onclick = () => post({ type:"meal", mealType:"Lunch", name: document.getElementById('target').value.toLowerCase(), uid: "ADMIN_LOGGED", qty: Number(document.getElementById('admQty').value) });
         document.getElementById('admDinner').onclick = () => post({ type:"meal", mealType:"Dinner", name: document.getElementById('target').value.toLowerCase(), uid: "ADMIN_LOGGED", qty: Number(document.getElementById('admQty').value) });
-
         document.getElementById('btnBazaar').onclick = () => {
             const info = document.getElementById('item').value, amt = Number(document.getElementById('amt').value);
             if(info && amt > 0) post({ type:"bazaar", info, amt, name: auth.currentUser.email.split('@')[0], uid: auth.currentUser.uid });
