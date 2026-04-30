@@ -3,119 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hostel Manager Pro | Boss Edition</title>
-    <!-- PWA Metadata for App-like feel -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#3182ce">
+    <title>Hostel Manager | Boss Edition</title>
     <style>
-        :root { --primary: #3182ce; --success: #38a169; --danger: #e53e3e; --admin: #7c3aed; --utility: #d97706; --notice: #fffbeb; }
-        body { font-family: system-ui, sans-serif; max-width: 900px; margin: 1rem auto; padding: 1rem; background: #f8fafc; color: #1e293b; }
-        .card { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 1.5rem; }
-        .admin-card { border: 2px solid var(--admin); background: #f5f3ff; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+        :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --admin: #7c3aed; --utility: #ea580c; --bg: #f1f5f9; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; background: var(--bg); color: #1e293b; display: flex; flex-direction: column; min-height: 100vh; }
         
-        .stats-board { display: flex; justify-content: space-around; background: var(--primary); color: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; text-align: center; font-weight: bold;}
-        
-        .ledger-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; }
-        @media (max-width: 600px) { .ledger-container { grid-template-columns: 1fr; } }
-        .ledger-col { background: #f1f5f9; padding: 10px; border-radius: 8px; min-height: 100px; }
-        .ledger-col h5 { margin: 0 0 10px 0; text-align: center; border-bottom: 1px solid #cbd5e0; padding-bottom: 5px; }
+        /* PAGE 1: LOGIN BOX */
+        #loginPage { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .login-card { background: white; width: 100%; max-width: 400px; padding: 2rem; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+        .login-card h2 { margin-bottom: 1.5rem; color: var(--primary); }
 
-        input, button, select { width: 100%; margin-bottom: 10px; padding: 0.8rem; border-radius: 6px; border: 1px solid #cbd5e0; box-sizing: border-box; }
-        button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; }
-        .btn-meal { background: var(--success); }
-        .btn-utility { background: var(--utility); }
-        .btn-admin { background: var(--admin); }
-        .btn-danger { background: var(--danger); width: auto; padding: 4px 8px; font-size: 0.7rem; }
+        /* PAGE 2: DASHBOARD */
+        #dashboardPage { display: none; padding: 15px; max-width: 1000px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .nav { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         
+        /* COMPONENTS */
+        .card { background: white; padding: 1.2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 1.2rem; }
+        .admin-section { border: 2.5px solid var(--admin); background: #f5f3ff; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
+        .flex-row { display: flex; gap: 10px; margin-top: 10px; }
+        
+        /* LEDGER COLUMNS */
+        .ledger-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .col { background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .col h5 { margin: 0 0 10px 0; text-align: center; padding-bottom: 5px; border-bottom: 2px solid #cbd5e0; }
+
+        /* INPUTS & BUTTONS */
+        input, button { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #cbd5e0; box-sizing: border-box; font-size: 14px; outline: none; }
+        button { background: var(--primary); color: white; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        button:active { transform: scale(0.98); }
+        .btn-meal { background: var(--success); }
+        .btn-admin { background: var(--admin); }
+        .btn-utility { background: var(--utility); }
+        .btn-logout { background: #64748b; width: auto; padding: 8px 15px; }
+        .btn-del { background: var(--danger); width: auto; padding: 2px 8px; font-size: 10px; }
+
+        /* UI ELEMENTS */
+        .item { font-size: 0.85rem; padding: 8px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+        .time { font-size: 0.7rem; color: #94a3b8; display: block; }
+        .stats { display: flex; justify-content: space-around; background: var(--primary); color: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center; }
         .hidden { display: none !important; }
-        .list-item { font-size: 0.8rem; padding: 5px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
-        .timestamp-label { font-size: 0.65rem; color: #64748b; display: block; }
+
+        @media (max-width: 700px) { .ledger-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-    <div id="authSection" class="card">
-        <h2>Hostel Entrance</h2>
-        <input type="text" id="userName" placeholder="Username">
-        <input type="password" id="password" placeholder="Password">
-        <button id="loginBtn">Sign In</button>
-        <button id="signupBtn" class="btn-meal">New Member? Sign Up</button>
+    <div id="loginPage">
+        <div class="login-card">
+            <h2>Hostel Entrance</h2>
+            <input type="text" id="user" placeholder="Username (e.g. fahim)">
+            <input type="password" id="pass" placeholder="Password">
+            <button id="loginBtn">Sign In</button>
+            <button id="signupBtn" class="btn-meal">New Member? Join Us</button>
+        </div>
     </div>
 
-    <div id="appSection" class="hidden">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h3>Welcome, <span id="displayName"></span>!</h3>
-            <button id="logoutBtn" class="btn-danger" style="background:#64748b">Logout</button>
+    <div id="dashboardPage">
+        <div class="nav">
+            <div><b>Boss:</b> <span id="displayUser"></span></div>
+            <button id="logoutBtn" class="btn-logout">Logout</button>
         </div>
 
-        <!-- ADMIN PANEL: Updated Labels -->
-        <div id="bossPanel" class="card admin-card hidden">
-            <h4 style="color: var(--admin); margin: 0 0 10px 0;">🛡️ Member Meal Entry (Admin)</h4>
-            <div class="grid">
-                <input type="text" id="targetMember" placeholder="Type Username (e.g. rocky)">
-                <input type="number" id="adminMealQty" step="0.25" value="1">
+        <div id="bossPanel" class="card admin-section hidden">
+            <h4 style="margin:0 0 10px 0; color:var(--admin)">🛡️ Admin Master Control</h4>
+            <div class="flex-row">
+                <input type="text" id="target" placeholder="Whose meal? (username)">
+                <input type="number" id="admQty" step="0.25" value="1" style="width:80px">
             </div>
-            <div style="display:flex; gap:10px;">
-                <button id="adminLunchBtn" class="btn-admin">Lunch</button>
-                <button id="adminDinnerBtn" class="btn-admin">Dinner</button>
+            <div class="flex-row">
+                <button id="admLunch" class="btn-admin">Lunch</button>
+                <button id="admDinner" class="btn-admin">Dinner</button>
             </div>
         </div>
 
-        <div class="stats-board">
-            <div><span>Total Bazaar</span><br>৳<span id="totalBazaar">0</span></div>
-            <div><span>Total Utility</span><br>৳<span id="totalUtility">0</span></div>
-            <div><span>Meal Rate</span><br>৳<span id="mealRate">0.00</span></div>
+        <div class="stats">
+            <div>Bazaar<br>৳<span id="statBazaar">0</span></div>
+            <div>Utility<br>৳<span id="statUtil">0</span></div>
+            <div>Rate<br>৳<span id="statRate">0.00</span></div>
         </div>
 
         <div class="grid">
             <div class="card">
-                <h4>Add Expense</h4>
-                <input type="text" id="expItem" placeholder="Item Name">
-                <input type="number" id="expAmount" placeholder="Amount (৳)">
-                <div style="display:flex; gap:10px;">
-                    <button id="addBazaarBtn">Add Bazaar</button>
-                    <button id="addUtilityBtn" class="btn-utility">Add Utility</button>
+                <h4>Log Daily Meal</h4>
+                <input type="number" id="myQty" step="0.25" value="1">
+                <div class="flex-row">
+                    <button id="btnLunch" class="btn-meal">Lunch</button>
+                    <button id="btnDinner" class="btn-meal">Dinner</button>
                 </div>
             </div>
             <div class="card">
-                <h4>Self Meal Entry</h4>
-                <input type="number" id="mealQty" step="0.25" value="1">
-                <div style="display:flex; gap:10px;">
-                    <button id="lunchBtn" class="btn-meal">Lunch</button>
-                    <button id="dinnerBtn" class="btn-meal">Dinner</button>
+                <h4>Log Expense</h4>
+                <input type="text" id="item" placeholder="What did you buy?">
+                <input type="number" id="amt" placeholder="Amount (৳)">
+                <div class="flex-row">
+                    <button id="btnBazaar">Bazaar</button>
+                    <button id="btnUtil" class="btn-utility">Utility</button>
                 </div>
             </div>
         </div>
 
         <div class="card">
-            <h4>Today's Activity Ledger</h4>
-            <div class="ledger-container">
-                <div class="ledger-col">
-                    <h5 style="color: var(--success);">🍲 Meals</h5>
-                    <div id="mealList"></div>
+            <h4>Today's Activity</h4>
+            <div class="ledger-grid">
+                <div class="col">
+                    <h5 style="color:var(--success)">Meals</h5>
+                    <div id="listMeals"></div>
                 </div>
-                <div class="ledger-col">
-                    <h5 style="color: var(--primary);">🛒 Bazaar</h5>
-                    <div id="bazaarList"></div>
+                <div class="col">
+                    <h5 style="color:var(--primary)">Bazaar</h5>
+                    <div id="listBazaar"></div>
                 </div>
-                <div class="ledger-col">
-                    <h5 style="color: var(--utility);">💡 Utility</h5>
-                    <div id="utilityList"></div>
+                <div class="col">
+                    <h5 style="color:var(--utility)">Utility</h5>
+                    <div id="listUtil"></div>
                 </div>
             </div>
         </div>
 
-        <div class="card">
-            <div style="display:flex; justify-content: space-between; align-items: center;">
-                <h4>Monthly Summary</h4>
-                <button id="refreshReport" style="width:auto; padding:5px 10px; font-size:0.8rem;">Refresh Table</button>
-            </div>
-            <table class="report-table" style="width:100%; border-collapse: collapse; font-size: 0.85rem; margin-top:10px;">
-                <thead><tr style="background:#edf2f7;"><th style="border:1px solid #cbd5e0; padding:8px;">Name</th><th style="border:1px solid #cbd5e0; padding:8px;">Bazaar</th><th style="border:1px solid #cbd5e0; padding:8px;">Meals</th><th style="border:1px solid #cbd5e0; padding:8px;">Cost</th><th style="border:1px solid #cbd5e0; padding:8px;">Balance</th></tr></thead>
-                <tbody id="reportTableBody"></tbody>
+        <div class="card" style="overflow-x:auto">
+            <h4>Monthly Ledger</h4>
+            <table style="width:100%; border-collapse: collapse; font-size: 13px;">
+                <thead style="background:#f8fafc">
+                    <tr><th style="padding:8px; border:1px solid #ddd">Name</th><th style="padding:8px; border:1px solid #ddd">Paid</th><th style="padding:8px; border:1px solid #ddd">Meals</th><th style="padding:8px; border:1px solid #ddd">Cost</th><th style="padding:8px; border:1px solid #ddd">Balance</th></tr>
+                </thead>
+                <tbody id="summaryTable"></tbody>
             </table>
         </div>
     </div>
@@ -137,94 +149,100 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        const BOSS_ID = "1qVj4SXnRvXFgXrVi0rZmpJZjJv1";
 
-        const ADMIN_UID = "1qVj4SXnRvXFgXrVi0rZmpJZjJv1";
+        const getEmail = () => document.getElementById('user').value.trim().toLowerCase() + "@mess.com";
 
-        const getEmail = () => document.getElementById('userName').value.trim().toLowerCase() + "@hostel.me";
-        document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, getEmail(), document.getElementById('password').value).catch(e => alert("Login Failed"));
-        document.getElementById('signupBtn').onclick = () => createUserWithEmailAndPassword(auth, getEmail(), document.getElementById('password').value).catch(e => alert(e.message));
+        // AUTH HANDLERS
+        document.getElementById('loginBtn').onclick = () => {
+            const p = document.getElementById('pass').value;
+            if(!p) return alert("Enter password, Boss!");
+            signInWithEmailAndPassword(auth, getEmail(), p).catch(e => alert("Wrong Credentials"));
+        };
+
+        document.getElementById('signupBtn').onclick = () => {
+            const p = document.getElementById('pass').value;
+            if(p.length < 6) return alert("Password must be 6+ chars");
+            createUserWithEmailAndPassword(auth, getEmail(), p).catch(e => alert(e.message));
+        };
+
         document.getElementById('logoutBtn').onclick = () => signOut(auth);
 
+        // ROUTING LOGIC (Single page switching)
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('authSection').classList.add('hidden');
-                document.getElementById('appSection').classList.remove('hidden');
-                document.getElementById('displayName').innerText = user.email.split('@')[0].toUpperCase();
-                if (user.uid === ADMIN_UID) document.getElementById('bossPanel').classList.remove('hidden');
-                runApp(user);
+            if(user) {
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('dashboardPage').style.display = 'block';
+                document.getElementById('displayUser').innerText = user.email.split('@')[0].toUpperCase();
+                if(user.uid === BOSS_ID) document.getElementById('bossPanel').classList.remove('hidden');
+                initData(user);
             } else {
-                document.getElementById('authSection').classList.remove('hidden');
-                document.getElementById('appSection').classList.add('hidden');
+                document.getElementById('loginPage').style.display = 'flex';
+                document.getElementById('dashboardPage').style.display = 'none';
             }
         });
 
-        function runApp(user) {
+        function initData(currentUser) {
             const q = query(collection(db, "transactions"), orderBy("timestamp", "desc"));
-            onSnapshot(q, (snapshot) => {
-                let bazaar = 0, utility = 0, totalMeals = 0, members = {};
-                const mList = document.getElementById('mealList'), bList = document.getElementById('bazaarList'), uList = document.getElementById('utilityList');
+            onSnapshot(q, (snap) => {
+                let bazaarTotal = 0, utilTotal = 0, mealCount = 0, members = {};
+                const mList = document.getElementById('listMeals'), bList = document.getElementById('listBazaar'), uList = document.getElementById('listUtil');
                 mList.innerHTML = ''; bList.innerHTML = ''; uList.innerHTML = '';
-                const todayStr = new Date().toLocaleDateString();
+                const today = new Date().toLocaleDateString();
 
-                snapshot.forEach(d => {
-                    const data = d.data();
-                    if (!data.timestamp) return;
-                    const logDate = data.timestamp.toDate().toLocaleDateString();
-                    const logTime = data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    
-                    if (!members[data.name]) members[data.name] = { paid: 0, ate: 0 };
-                    const delBtn = (user.uid === ADMIN_UID || data.uid === user.uid) ? `<button class="btn-danger" onclick="deleteEntry('${d.id}')">X</button>` : '';
+                snap.forEach(s => {
+                    const d = s.data(); if(!d.timestamp) return;
+                    const logDate = d.timestamp.toDate().toLocaleDateString();
+                    const logTime = d.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    if(!members[d.name]) members[d.name] = { paid:0, ate:0 };
 
-                    if (data.type === "meal") {
-                        totalMeals += Number(data.meals);
-                        members[data.name].ate += Number(data.meals);
-                        if (logDate === todayStr) {
-                            mList.innerHTML += `<div class="list-item"><span><b>${data.name}</b>: ${data.mealType} ${data.meals}<span class="timestamp-label">${logTime}</span></span> ${delBtn}</div>`;
-                        }
-                    } else if (data.type === "bazaar") {
-                        bazaar += data.amount;
-                        members[data.name].paid += data.amount;
-                        if (logDate === todayStr) bList.innerHTML += `<div class="list-item"><span><b>${data.name}</b>: ${data.item} (৳${data.amount})<span class="timestamp-label">${logTime}</span></span> ${delBtn}</div>`;
-                    } else if (data.type === "utility") {
-                        utility += data.amount;
-                        if (logDate === todayStr) uList.innerHTML += `<div class="list-item"><span><b>${data.name}</b>: ${data.item} (৳${data.amount})<span class="timestamp-label">${logTime}</span></span> ${delBtn}</div>`;
+                    const del = (currentUser.uid === BOSS_ID || d.uid === currentUser.uid) ? `<button class="btn-del" onclick="removeEntry('${s.id}')">X</button>` : '';
+
+                    if(d.type === "meal") {
+                        mealCount += Number(d.qty);
+                        members[d.name].ate += Number(d.qty);
+                        if(logDate === today) mList.innerHTML += `<div class="item"><span><b>${d.name}</b>: ${d.mealType} ${d.qty}<span class="time">${logTime}</span></span>${del}</div>`;
+                    } else if(d.type === "bazaar") {
+                        bazaarTotal += d.amt; members[d.name].paid += d.amt;
+                        if(logDate === today) bList.innerHTML += `<div class="item"><span><b>${d.name}</b>: ${d.info} (৳${d.amt})<span class="time">${logTime}</span></span>${del}</div>`;
+                    } else if(d.type === "util") {
+                        utilTotal += d.amt;
+                        if(logDate === today) uList.innerHTML += `<div class="item"><span><b>${d.name}</b>: ${d.info} (৳${d.amt})<span class="time">${logTime}</span></span>${del}</div>`;
                     }
                 });
 
-                const mealRate = totalMeals > 0 ? bazaar / totalMeals : 0;
-                document.getElementById('totalBazaar').innerText = bazaar;
-                document.getElementById('totalUtility').innerText = utility;
-                document.getElementById('mealRate').innerText = mealRate.toFixed(2);
+                const rate = mealCount > 0 ? bazaarTotal / mealCount : 0;
+                document.getElementById('statBazaar').innerText = bazaarTotal;
+                document.getElementById('statUtil').innerText = utilTotal;
+                document.getElementById('statRate').innerText = rate.toFixed(2);
 
-                document.getElementById('refreshReport').onclick = () => {
-                    const table = document.getElementById('reportTableBody');
-                    table.innerHTML = '';
-                    for (const name in members) {
-                        const m = members[name];
-                        const cost = m.ate * mealRate;
-                        const bal = m.paid - cost;
-                        table.innerHTML += `<tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:8px; border:1px solid #cbd5e0;">${name}</td><td style="padding:8px; border:1px solid #cbd5e0;">${m.paid}</td><td style="padding:8px; border:1px solid #cbd5e0;">${m.ate.toFixed(2)}</td><td style="padding:8px; border:1px solid #cbd5e0;">${cost.toFixed(0)}</td><td style="padding:8px; border:1px solid #cbd5e0; color:${bal>=0?'green':'red'}">${bal.toFixed(0)}</td></tr>`;
-                    }
-                };
+                const table = document.getElementById('summaryTable'); table.innerHTML = '';
+                for(const name in members) {
+                    const m = members[name], cost = m.ate * rate, bal = m.paid - cost;
+                    table.innerHTML += `<tr><td style="padding:8px; border:1px solid #ddd">${name}</td><td style="padding:8px; border:1px solid #ddd">${m.paid}</td><td style="padding:8px; border:1px solid #ddd">${m.ate.toFixed(1)}</td><td style="padding:8px; border:1px solid #ddd">${cost.toFixed(0)}</td><td style="padding:8px; border:1px solid #ddd; font-weight:bold; color:${bal>=0?'green':'red'}">${bal.toFixed(0)}</td></tr>`;
+                }
             });
         }
 
-        window.deleteEntry = async (id) => await deleteDoc(doc(db, "transactions", id));
-        const logExpense = async (type) => {
-            const item = document.getElementById('expItem').value, amt = Number(document.getElementById('expAmount').value);
-            if(item && amt > 0) { await addDoc(collection(db, "transactions"), { type, name: auth.currentUser.email.split('@')[0], uid: auth.currentUser.uid, item, amount: amt, timestamp: serverTimestamp() }); document.getElementById('expItem').value = ''; document.getElementById('expAmount').value = ''; }
-        };
-        document.getElementById('addBazaarBtn').onclick = () => logExpense('bazaar');
-        document.getElementById('addUtilityBtn').onclick = () => logExpense('utility');
+        window.removeEntry = async (id) => await deleteDoc(doc(db, "transactions", id));
 
-        const logMeal = async (type, uName = null, uId = null) => {
-            const qty = Number(document.getElementById(uName ? 'adminMealQty' : 'mealQty').value);
-            if(qty > 0) { await addDoc(collection(db, "transactions"), { type: "meal", mealType: type, name: uName || auth.currentUser.email.split('@')[0], uid: uId || auth.currentUser.uid, meals: qty, timestamp: serverTimestamp() }); }
+        const post = async (data) => await addDoc(collection(db, "transactions"), { ...data, timestamp: serverTimestamp() });
+
+        // BUTTON ACTIONS
+        document.getElementById('btnLunch').onclick = () => post({ type:"meal", mealType:"Lunch", name: auth.currentUser.email.split('@')[0], uid: auth.currentUser.uid, qty: Number(document.getElementById('myQty').value) });
+        document.getElementById('btnDinner').onclick = () => post({ type:"meal", mealType:"Dinner", name: auth.currentUser.email.split('@')[0], uid: auth.currentUser.uid, qty: Number(document.getElementById('myQty').value) });
+        
+        document.getElementById('admLunch').onclick = () => post({ type:"meal", mealType:"Lunch", name: document.getElementById('target').value.toLowerCase(), uid: "ADMIN_LOGGED", qty: Number(document.getElementById('admQty').value) });
+        document.getElementById('admDinner').onclick = () => post({ type:"meal", mealType:"Dinner", name: document.getElementById('target').value.toLowerCase(), uid: "ADMIN_LOGGED", qty: Number(document.getElementById('admQty').value) });
+
+        document.getElementById('btnBazaar').onclick = () => {
+            const info = document.getElementById('item').value, amt = Number(document.getElementById('amt').value);
+            if(info && amt > 0) post({ type:"bazaar", info, amt, name: auth.currentUser.email.split('@')[0], uid: auth.currentUser.uid });
         };
-        document.getElementById('lunchBtn').onclick = () => logMeal('Lunch');
-        document.getElementById('dinnerBtn').onclick = () => logMeal('Dinner');
-        document.getElementById('adminLunchBtn').onclick = () => logMeal('Lunch', document.getElementById('targetMember').value.trim().toLowerCase(), "ADMIN_FORCED");
-        document.getElementById('adminDinnerBtn').onclick = () => logMeal('Dinner', document.getElementById('targetMember').value.trim().toLowerCase(), "ADMIN_FORCED");
+        document.getElementById('btnUtil').onclick = () => {
+            const info = document.getElementById('item').value, amt = Number(document.getElementById('amt').value);
+            if(info && amt > 0) post({ type:"util", info, amt, name: auth.currentUser.email.split('@')[0], uid: auth.currentUser.uid });
+        };
     </script>
 </body>
 </html>
