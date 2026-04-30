@@ -21,6 +21,7 @@
         .input-box { width: 100%; background-color: #f8fafc; padding: 1rem; border-radius: 1.25rem; outline: none; border: 1px solid #f1f5f9; font-size: 0.875rem; font-weight: 600; transition: all 0.2s; }
         .input-box:focus { border-color: #6366f1; background-color: #fff; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.08); }
         .availability-badge { font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 4px 10px; border-radius: 8px; margin-top: 6px; display: inline-block; }
+        .apple-gradient { background: linear-gradient(135deg, #dceefb 0%, #a7d8f0 100%); }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 pb-32">
@@ -32,7 +33,7 @@
     </div>
 
     <!-- LOGIN VIEW -->
-    <section id="view-login" class="min-h-screen hidden flex items-center justify-center p-6 bg-gradient-to-br from-[#dceefb] to-[#a7d8f0]">
+    <section id="view-login" class="min-h-screen hidden flex items-center justify-center p-6 apple-gradient">
         <div class="bg-white w-full max-w-sm rounded-[40px] p-8 shadow-2xl animate-slide-up">
             <div class="text-center mb-8">
                 <div class="w-16 h-16 bg-indigo-600 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white shadow-lg">
@@ -54,7 +55,7 @@
     </section>
 
     <!-- SIGNUP VIEW -->
-    <section id="view-signup" class="min-h-screen hidden flex items-center justify-center p-6 bg-gradient-to-br from-[#dceefb] to-[#a7d8f0]">
+    <section id="view-signup" class="min-h-screen hidden flex items-center justify-center p-6 apple-gradient">
         <div class="bg-white w-full max-w-sm rounded-[40px] p-8 shadow-2xl animate-slide-up">
             <button onclick="switchAuthView('login')" class="mb-4 text-slate-400 active:scale-90 transition-transform"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
             <div class="text-center mb-8">
@@ -83,7 +84,7 @@
 
     <!-- MAIN APP WRAPPER -->
     <div id="appWrapper" class="hidden">
-        <header id="mainHeader" class="bg-gradient-to-br from-[#dceefb] to-[#a7d8f0] p-6 pt-12 rounded-b-[40px] shadow-lg border-b border-white/20">
+        <header id="mainHeader" class="apple-gradient p-6 pt-12 rounded-b-[40px] shadow-lg border-b border-white/20">
             <div class="flex justify-between items-start mb-6">
                 <div>
                     <h1 id="userDisplayName" class="text-slate-800 font-bold text-xl leading-tight">User</h1>
@@ -104,12 +105,12 @@
         </header>
 
         <main id="viewContainer">
-            <!-- HOME VIEW -->
             <section id="view-home" class="view px-5 mt-6 animate-fade-in">
                 <div class="grid grid-cols-4 gap-2.5">
-                    <button onclick="toggleModal('activeMealsModal')" class="bg-[#bae6fd] p-3 rounded-2xl border border-[#7dd3fc] text-center shadow-md active:scale-95">
+                    <button onclick="toggleModal('activeMealsModal')" class="apple-gradient p-3 rounded-2xl border border-white/50 text-center shadow-lg active:scale-95">
                         <i data-lucide="check-circle-2" class="w-4 h-4 mx-auto text-indigo-900 mb-1"></i>
-                        <div id="activeCounts" class="text-[10px] font-bold text-indigo-950">L:0 | D:0</div>
+                        <div class="text-[8px] text-indigo-700 uppercase font-black leading-none mb-1">Today Active</div>
+                        <div id="activeCounts" class="text-[10px] font-black text-indigo-950">L:0 | D:0</div>
                     </button>
                     <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center shadow-sm">
                         <i data-lucide="shopping-bag" class="w-4 h-4 mx-auto text-emerald-600 mb-1"></i>
@@ -184,7 +185,6 @@
             </section>
         </main>
 
-        <!-- NAVIGATION -->
         <nav class="fixed bottom-6 left-5 right-5 h-20 bg-slate-900/95 rounded-[40px] shadow-2xl flex items-center justify-between px-6 z-50 border border-slate-800 backdrop-blur-lg">
             <button onclick="nav('home')" id="nav-home" class="p-3 rounded-full text-white bg-slate-800"><i data-lucide="utensils" class="w-5 h-5"></i></button>
             <button onclick="nav('history')" id="nav-history" class="p-3 rounded-full text-slate-500"><i data-lucide="history" class="w-5 h-5"></i></button>
@@ -197,64 +197,31 @@
     <!-- MODALS -->
     <div id="forgotPassModal" class="fixed inset-0 z-[120] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
         <div class="bg-white w-full max-w-sm rounded-[32px] p-8 shadow-2xl">
-            <div class="flex justify-between items-center mb-6"><h3 class="font-black text-xl uppercase tracking-tighter">Reset Access</h3><button onclick="toggleModal('forgotPassModal')"><i data-lucide="x" class="w-4 h-4"></i></button></div>
-            <p class="text-xs text-slate-500 font-medium mb-4 leading-relaxed">Submit your User ID. Manager will review and approve your password change request.</p>
-            <input type="text" id="resetUid" placeholder="Enter your User ID" class="input-box mb-4" />
-            <button onclick="requestPasswordReset()" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-lg text-xs uppercase tracking-widest">Submit Request</button>
+            <div class="flex justify-between items-center mb-6"><h3 class="font-black text-xl uppercase tracking-tighter">Reset Request</h3><button onclick="toggleModal('forgotPassModal')"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+            <p class="text-xs text-slate-500 font-medium mb-4">Submit your User ID. Manager will approve your password reset.</p>
+            <input type="text" id="resetUid" placeholder="Your User ID" class="input-box mb-4" />
+            <button onclick="requestPasswordReset()" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-lg text-xs uppercase">Submit</button>
         </div>
     </div>
 
-    <div id="routineModal" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-sm rounded-[32px] p-6 shadow-2xl">
-            <div class="flex justify-between items-center mb-6"><h3 class="font-black text-lg uppercase">Edit Menu</h3><button onclick="toggleModal('routineModal')"><i data-lucide="x" class="w-4 h-4"></i></button></div>
-            <div class="space-y-4">
-                <select id="rotDay" onchange="loadDayMenu()" class="input-box">
-                    <option value="Sat">Saturday</option><option value="Sun">Sunday</option><option value="Mon">Monday</option><option value="Tue">Tuesday</option><option value="Wed">Wednesday</option><option value="Thu">Thursday</option><option value="Fri">Friday</option>
-                </select>
-                <input type="text" id="rotL" placeholder="Lunch" class="input-box" />
-                <input type="text" id="rotD" placeholder="Dinner" class="input-box" />
-                <button onclick="updateRoutine()" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl text-xs uppercase tracking-widest">Update Day</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="logModal" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-sm rounded-[32px] p-8 shadow-2xl">
-            <div class="flex justify-between items-center mb-6"><h3 class="font-black text-xl uppercase tracking-tighter">New Entry</h3><button onclick="toggleModal('logModal')"><i data-lucide="x" class="w-4 h-4"></i></button></div>
-            <div class="space-y-4">
-                <input type="text" id="itemName" placeholder="Item Name" class="input-box" />
-                <div class="flex gap-2">
-                    <input type="number" id="itemPrice" placeholder="Amount (৳)" class="input-box flex-1" />
-                    <select id="itemType" class="input-box w-1/3 tracking-tighter"><option>Bazaar</option><option>Utility</option></select>
-                </div>
-                <button onclick="submitLog()" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl text-xs uppercase tracking-widest">Confirm Log</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="activeMealsModal" class="fixed inset-0 z-[110] hidden flex items-end justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-sm rounded-[32px] p-6 shadow-2xl">
-            <div class="flex justify-between items-center mb-6"><h3 class="font-bold text-lg">Daily Breakdown</h3><button onclick="toggleModal('activeMealsModal')"><i data-lucide="x" class="w-4 h-4"></i></button></div>
-            <div id="activeMealsItems" class="space-y-3 max-h-[50vh] overflow-y-auto pr-1"></div>
-        </div>
-    </div>
-
-    <div id="notifyModal" class="fixed inset-0 z-[110] hidden flex items-start justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-sm rounded-[32px] mt-20 p-6 shadow-2xl">
-            <div class="flex justify-between items-center mb-6"><h3 class="font-bold text-lg">Alerts</h3><button onclick="toggleModal('notifyModal')"><i data-lucide="x" class="w-4 h-4"></i></button></div>
-            <div id="notifList" class="space-y-4"></div>
-        </div>
-    </div>
-
+    <!-- Firebase Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, addDoc, serverTimestamp, getDocs, updateDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global placeholders provided by environment
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'hostel-pro-elite';
+        // CONFIGURATION
+        // If uploading to your live site, replace the empty string with your real Firebase Config object!
+        const liveFirebaseConfig = null; // PASTE YOUR FIREBASE CONFIG HERE ON LIVE SITE
+
+        const firebaseConfig = liveFirebaseConfig || (typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'hostel-pro-v1';
         
+        if (!firebaseConfig) {
+            console.error("Missing Firebase Configuration!");
+            document.getElementById('loadingOverlay').innerHTML = `<p class="p-6 text-center text-rose-500 font-bold">Error: Firebase Config Missing.<br>Check code comments.</p>`;
+        }
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -269,72 +236,58 @@
             { day: 'Fri', lunch: 'Chicken/Special', dinner: 'Fish' }
         ];
 
-        // --- CORE MANDATORY INIT ---
+        // --- AUTH INITIALIZATION ---
         const initAuth = async () => {
             try {
-                // Perform initial anonymous sign in to establish connection for ID checking
+                // Anonymous sign-in for real-time ID checks before user logs in
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
                 }
             } catch (error) {
-                console.error("Auth initialization failed:", error);
-            } finally {
-                // Ensure loader hides eventually
-                setTimeout(() => {
-                    if (document.getElementById('loadingOverlay')) {
-                        document.getElementById('loadingOverlay').classList.add('hidden');
-                        lucide.createIcons();
-                    }
-                }, 2000);
+                console.error("Connection failed:", error);
             }
         };
 
-        // --- REAL-TIME UID CHECKER ---
-        window.checkIdAvailability = async (uid) => {
-            const hint = document.getElementById('emailHint');
-            const status = document.getElementById('availabilityStatus');
-            const btn = document.getElementById('signupBtn');
-            const cleanId = uid.trim().toLowerCase();
-
-            if(!cleanId) {
-                status.innerHTML = '';
-                hint.innerHTML = 'Identity: <span class="text-indigo-500">...@gmail.com</span>';
-                btn.disabled = true;
-                btn.className = "w-full bg-slate-200 text-slate-400 font-black py-4 rounded-2xl shadow-lg cursor-not-allowed uppercase tracking-widest text-xs mt-2";
-                return;
-            }
-
-            hint.innerHTML = `Identity: <span class="text-indigo-500">${cleanId}@gmail.com</span>`;
-
-            try {
-                if (!auth.currentUser) return;
-                const membersRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
-                const q = await getDocs(membersRef);
-                const exists = q.docs.some(d => d.data().uid === cleanId);
-
-                if(exists) {
-                    status.innerHTML = `<span class="availability-badge bg-rose-100 text-rose-600">ID Taken / Not Available</span>`;
-                    btn.disabled = true;
-                    btn.className = "w-full bg-slate-200 text-slate-400 font-black py-4 rounded-2xl shadow-lg cursor-not-allowed uppercase tracking-widest text-xs mt-2";
-                } else {
-                    status.innerHTML = `<span class="availability-badge bg-emerald-100 text-emerald-600">UserID Available</span>`;
-                    btn.disabled = false;
-                    btn.className = "w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-transform uppercase tracking-widest text-xs mt-2";
-                }
-            } catch (err) {
-                console.error("ID availability check failed:", err);
-            }
-        };
-
-        // --- AUTH LOGIC ---
+        // UI View Logic
         window.switchAuthView = (mode) => {
             document.getElementById('view-login').classList.toggle('hidden', mode === 'signup');
             document.getElementById('view-signup').classList.toggle('hidden', mode === 'login');
             lucide.createIcons();
         };
 
+        // --- ID AVAILABILITY CHECKER ---
+        window.checkIdAvailability = async (uid) => {
+            const status = document.getElementById('availabilityStatus');
+            const btn = document.getElementById('signupBtn');
+            const cleanId = uid.trim().toLowerCase();
+
+            if(!cleanId) {
+                status.innerHTML = '';
+                btn.disabled = true;
+                btn.className = "w-full bg-slate-200 text-slate-400 font-black py-4 rounded-2xl shadow-lg cursor-not-allowed uppercase text-xs mt-2";
+                return;
+            }
+
+            try {
+                const membersRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
+                const q = await getDocs(membersRef);
+                const exists = q.docs.some(d => d.data().uid === cleanId);
+
+                if(exists) {
+                    status.innerHTML = `<span class="availability-badge bg-rose-100 text-rose-600">UserID Taken</span>`;
+                    btn.disabled = true;
+                    btn.className = "w-full bg-slate-200 text-slate-400 font-black py-4 rounded-2xl shadow-lg cursor-not-allowed uppercase text-xs mt-2";
+                } else {
+                    status.innerHTML = `<span class="availability-badge bg-emerald-100 text-emerald-600">Available</span>`;
+                    btn.disabled = false;
+                    btn.className = "w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-transform uppercase text-xs mt-2";
+                }
+            } catch (err) { console.error(err); }
+        };
+
+        // --- HANDLERS ---
         window.handleLogin = async () => {
             const uid = document.getElementById('loginId').value.trim();
             const pass = document.getElementById('loginPass').value;
@@ -342,15 +295,11 @@
 
             const email = `${uid.toLowerCase()}@gmail.com`;
             try {
-                const btn = document.getElementById('loginBtn');
-                btn.disabled = true;
-                btn.innerText = "Verifying...";
+                document.getElementById('loginBtn').innerText = "Verifying...";
                 await signInWithEmailAndPassword(auth, email, pass);
             } catch(e) { 
-                alert("Login failed. Check ID/Pass or contact Manager."); 
-                const btn = document.getElementById('loginBtn');
-                btn.disabled = false;
-                btn.innerText = "Sign In";
+                alert("Login Error: Incorrect ID/Password or access restricted.");
+                document.getElementById('loginBtn').innerText = "Sign In";
             }
         };
 
@@ -366,9 +315,7 @@
 
             try {
                 const cred = await createUserWithEmailAndPassword(auth, email, pass);
-                // MD. Fahim Shahriar with Fahim-admin or Fahim-manager logic
-                let role = 'Roommate';
-                if(fullId === 'fahim-admin' || fullId === 'fahim-manager') role = 'Manager';
+                let role = (fullId === 'fahim-admin' || fullId === 'fahim-manager') ? 'Manager' : 'Roommate';
 
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', cred.user.uid), {
                     id: cred.user.uid,
@@ -380,39 +327,15 @@
                     lActive: true, dActive: true, lunchQty: 1, dinnerQty: 1,
                     isPendingReset: false
                 });
-            } catch(e) { alert(e.message); }
+            } catch(e) { alert("Signup failed: " + e.message); }
         };
 
         window.handleLogout = () => signOut(auth);
 
-        window.requestPasswordReset = async () => {
-            const uid = document.getElementById('resetUid').value.trim();
-            if(!uid) return;
-            const fullId = uid.toLowerCase();
-            
-            try {
-                const q = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'members'));
-                const uDoc = q.docs.find(d => d.data().uid === fullId);
-                
-                if(uDoc) {
-                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'requests'), {
-                        uid: fullId, userId: uDoc.id, type: 'Password Reset', at: Date.now()
-                    });
-                    alert("Request sent. Access will be restricted until Manager approval.");
-                    toggleModal('forgotPassModal');
-                } else { alert("ID not found."); }
-            } catch (err) {
-                console.error("Reset request failed:", err);
-            }
-        };
-
+        // --- STATE LISTENER ---
         onAuthStateChanged(auth, async (u) => {
-            // Loader handling
-            if (document.getElementById('loadingOverlay')) {
-                document.getElementById('loadingOverlay').classList.add('hidden');
-                lucide.createIcons();
-            }
-
+            document.getElementById('loadingOverlay').classList.add('hidden');
+            
             if(u && !u.isAnonymous) {
                 const d = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u.uid));
                 if(d.exists()) {
@@ -420,31 +343,21 @@
                     document.getElementById('view-login').classList.add('hidden');
                     document.getElementById('view-signup').classList.add('hidden');
                     document.getElementById('appWrapper').classList.remove('hidden');
-                    if(user.isPendingReset) {
-                        document.getElementById('saveBtn').classList.add('hidden');
-                        document.getElementById('addLogBtn').classList.add('hidden');
-                        document.getElementById('cycleBar').classList.add('hidden');
-                    }
                     startSync();
                 } else {
-                    // Fail-safe if Auth exists but Firestore doc is missing
-                    document.getElementById('appWrapper').classList.add('hidden');
                     document.getElementById('view-login').classList.remove('hidden');
-                    document.getElementById('view-signup').classList.add('hidden');
                 }
             } else {
                 document.getElementById('appWrapper').classList.add('hidden');
-                document.getElementById('view-login').classList.remove('hidden');
-                // Don't auto-hide signup if the user was already there
-                if (!document.getElementById('view-signup').classList.contains('hidden')) {
-                     document.getElementById('view-login').classList.add('hidden');
+                if (document.getElementById('view-signup').classList.contains('hidden')) {
+                    document.getElementById('view-login').classList.remove('hidden');
                 }
             }
+            lucide.createIcons();
         });
 
-        // --- DATABASE SYNC ---
+        // --- SYNC ---
         function startSync() {
-            if (!auth.currentUser || auth.currentUser.isAnonymous) return;
             document.getElementById('userDisplayName').innerText = user.name;
             document.getElementById('userDisplayRole').innerText = user.role;
             document.getElementById('todayDisplay').innerText = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
@@ -458,103 +371,72 @@
                 members = s.docs.map(doc => doc.data());
                 renderHome();
                 renderMembers();
-            }, (err) => console.error("Members sync error", err));
+            });
 
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'routine'), (s) => {
-                if(s.empty) {
-                    defaultRoutine.forEach(r => setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'routine', r.day), r));
-                }
+                if(s.empty) defaultRoutine.forEach(r => setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'routine', r.day), r));
                 routine = s.docs.map(doc => doc.data());
                 renderRoutine();
-            }, (err) => console.error("Routine sync error", err));
+            });
 
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'logs'), (s) => {
                 logs = s.docs.map(doc => doc.data()).sort((a,b) => b.at - a.at);
                 renderStats();
-                renderNotifications();
-            }, (err) => console.error("Logs sync error", err));
-
-            if(user.role === 'Manager') {
-                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'requests'), (s) => {
-                    requests = s.docs.map(doc => ({...doc.data(), id: doc.id}));
-                    renderNotifications();
-                }, (err) => console.error("Requests sync error", err));
-            }
+            });
         }
 
-        // --- RENDERERS ---
+        // --- RENDERERS (Core UI) ---
         function renderHome() {
             const list = document.getElementById('mealMgmtItems');
             if(!members.length) return;
 
             const hour = new Date().getHours();
-            const isM = user.role === 'Manager' && !user.isPendingReset;
+            const isM = user.role === 'Manager';
             const lLocked = !isM && hour >= LUNCH_LOCK;
             const dLocked = !isM && hour >= DINNER_LOCK;
 
-            const badge = document.getElementById('mealStatusBadge');
-            badge.innerText = isM ? "Manager Access" : (lLocked && dLocked ? "Locked" : "Open");
-            badge.className = `text-[9px] font-black px-2 py-1 rounded-lg ${isM ? 'bg-indigo-100 text-indigo-600' : 'bg-emerald-100 text-emerald-600'}`;
+            document.getElementById('mealStatusBadge').innerText = isM ? "Manager Mode" : (lLocked && dLocked ? "Locked" : "Open");
+            document.getElementById('mealStatusBadge').className = `text-[9px] font-black px-2 py-1 rounded-lg ${isM ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'}`;
 
             list.innerHTML = members.map(m => `
                 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-                    <div class="flex justify-between items-center mb-3"><span class="font-bold text-sm text-slate-700">${m.name}</span></div>
+                    <div class="flex justify-between items-center mb-3 font-bold text-sm text-slate-700">${m.name}</div>
                     <div class="grid grid-cols-2 gap-3">
-                        ${mealCtrl(m, 'l', lLocked)}
-                        ${mealCtrl(m, 'd', dLocked)}
+                        ${mealBlock(m, 'l', lLocked)}
+                        ${mealBlock(m, 'd', dLocked)}
                     </div>
                 </div>
             `).join('');
-
-            const me = members.find(m => m.id === auth.currentUser.uid);
-            if(me) {
-                document.getElementById('myMeals').innerText = (me.meals || 0).toFixed(1);
-                document.getElementById('myGrocery').innerText = me.grocery || 0;
-                document.getElementById('myCost').innerText = me.mealExp || 0;
-                document.getElementById('myBalance').innerText = me.balance || 0;
-            }
             lucide.createIcons();
         }
 
-        function mealCtrl(m, type, locked) {
-            const active = type === 'l' ? m.lActive : m.dActive;
-            const qty = type === 'l' ? m.lunchQty : m.dinnerQty;
+        function mealBlock(m, t, locked) {
+            const active = t === 'l' ? m.lActive : m.dActive;
+            const q = t === 'l' ? m.lunchQty : m.dinnerQty;
             return `
                 <div class="p-3 rounded-xl flex justify-between items-center border ${active ? 'bg-blue-50/50 border-blue-100' : 'bg-slate-50 opacity-40'} ${locked ? 'locked-meal' : ''}">
-                    <button class="p-1.5 rounded-lg ${active ? 'text-blue-600 bg-blue-100' : 'text-slate-400 bg-slate-200'}">
-                        <i data-lucide="${locked ? 'lock' : 'power'}" class="w-3 h-3"></i>
-                    </button>
-                    <span class="text-sm font-black">${active ? qty.toFixed(2) : 'OFF'}</span>
-                    <div class="flex flex-col gap-1">
-                        <i data-lucide="plus" class="w-3 h-3 text-emerald-500 cursor-pointer"></i>
-                        <i data-lucide="minus" class="w-3 h-3 text-rose-500 cursor-pointer"></i>
-                    </div>
+                    <i data-lucide="${locked ? 'lock' : 'power'}" class="w-3 h-3 text-blue-600"></i>
+                    <span class="text-sm font-black">${active ? q.toFixed(2) : 'OFF'}</span>
+                    <div class="flex flex-col gap-1"><i data-lucide="plus" class="w-3 h-3 text-emerald-500"></i><i data-lucide="minus" class="w-3 h-3 text-rose-500"></i></div>
                 </div>
             `;
         }
 
         function renderStats() {
-            const gr = logs.filter(l => l.type === 'Bazaar').reduce((a,b) => a + Number(b.amount), 0);
-            const ut = logs.filter(l => l.type === 'Utility').reduce((a,b) => a + Number(b.amount), 0);
-            document.getElementById('totalGrocery').innerText = gr;
-            document.getElementById('totalUtility').innerText = ut;
             const al = members.reduce((a,b) => a + (b.lActive ? b.lunchQty : 0), 0);
             const ad = members.reduce((a,b) => a + (b.dActive ? b.dinnerQty : 0), 0);
             document.getElementById('activeCounts').innerText = `L:${al} | D:${ad}`;
-            
-            document.getElementById('activeMealsItems').innerHTML = members.map(m => `
-                <div class="p-4 bg-slate-50 rounded-2xl flex justify-between items-center border">
-                    <span class="text-xs font-black">${m.name}</span>
-                    <div class="flex gap-4">
-                        <span class="text-[10px] font-bold px-2 py-1 rounded-lg ${m.lActive ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-200'}">L: ${m.lActive ? m.lunchQty : 'OFF'}</span>
-                        <span class="text-[10px] font-bold px-2 py-1 rounded-lg ${m.dActive ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200'}">D: ${m.dActive ? m.dinnerQty : 'OFF'}</span>
-                    </div>
-                </div>
-            `).join('');
+            // Summary Update
+            const me = members.find(m => m.id === auth.currentUser.uid);
+            if(me) {
+                document.getElementById('myMeals').innerText = (me.meals || 0).toFixed(1);
+                document.getElementById('myGrocery').innerText = me.grocery || 0;
+                document.getElementById('myBalance').innerText = me.balance || 0;
+            }
         }
 
         function renderRoutine() {
-            const box = document.getElementById('routineContent');
+            const box = document.getElementById('routineList');
             const order = ['Sat','Sun','Mon','Tue','Wed','Thu','Fri'];
             const sorted = [...routine].sort((a,b) => order.indexOf(a.day) - order.indexOf(b.day));
             box.innerHTML = sorted.map(r => `
@@ -567,135 +449,27 @@
         }
 
         function renderMembers() {
-            const list = document.getElementById('directoryItems');
-            list.innerHTML = members.map(m => `
-                <div onclick="showDetail('${m.id}')" class="bg-white rounded-[24px] p-5 border shadow-sm active:scale-95 transition-transform cursor-pointer">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center font-black text-indigo-300">${(m.uid || '?')[0].toUpperCase()}</div>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-slate-800">${m.name}</h4>
-                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">${m.uid}</p>
-                        </div>
-                        <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300"></i>
-                    </div>
+            document.getElementById('directoryItems').innerHTML = members.map(m => `
+                <div class="bg-white rounded-[24px] p-5 border shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center font-black text-indigo-300">${(m.uid || '?')[0].toUpperCase()}</div>
+                    <div class="flex-1"><h4 class="font-bold text-slate-800">${m.name}</h4><p class="text-[10px] text-slate-400 font-bold uppercase">${m.uid}</p></div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300"></i>
                 </div>
             `).join('');
             lucide.createIcons();
         }
 
-        function renderNotifications() {
-            const list = document.getElementById('notifList');
-            const badge = document.getElementById('notifBadge');
-            let html = '';
-            if(user && user.role === 'Manager' && requests.length > 0) {
-                badge.classList.remove('hidden');
-                requests.forEach(r => {
-                    html += `<div class="p-4 bg-amber-50 rounded-2xl border">
-                        <div class="flex justify-between items-start mb-2"><p class="text-xs font-bold text-amber-900">${r.uid} reset req</p><button onclick="approveRequest('${r.id}', '${r.userId}')" class="text-[9px] font-black text-white bg-indigo-600 px-3 py-1 rounded-lg">APPROVE</button></div>
-                    </div>`;
-                });
-            } else { badge.classList.add('hidden'); }
-            logs.slice(0, 5).forEach(l => {
-                html += `<div class="flex gap-3 border-b border-slate-50 pb-3"><div class="flex-1"><p class="text-xs font-medium text-slate-700">${l.label} Logged</p><p class="text-[9px] text-slate-400">By ${l.by}</p></div></div>`;
-            });
-            list.innerHTML = html || emptyDataHTML("No new alerts.");
-            lucide.createIcons();
-        }
-
-        // --- ACTIONS ---
-        window.approveRequest = async (rid, uid) => {
-            if(confirm("Approve?")) {
-                try {
-                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', uid), { isPendingReset: false });
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'requests', rid));
-                } catch (err) {
-                    console.error("Approve failed:", err);
-                }
-            }
-        };
-
-        window.submitLog = async () => {
-            if(user.isPendingReset) return;
-            const name = document.getElementById('itemName').value;
-            const amount = document.getElementById('itemPrice').value;
-            const type = document.getElementById('itemType').value;
-            if(!name || !amount) return;
-            try {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'logs'), {
-                    label: name, amount, type, by: user.name, at: Date.now()
-                });
-                toggleModal('logModal');
-            } catch (err) {
-                console.error("Log submit failed:", err);
-            }
-        };
-
-        window.showDetail = (id) => {
-            const m = members.find(x => x.id === id);
-            const isManager = user.role === 'Manager' && user.id !== m.id;
-            document.getElementById('profileCardContent').innerHTML = `
-                <div class="bg-white rounded-[40px] p-8 shadow-sm border text-center">
-                    <div class="w-24 h-24 bg-indigo-50 rounded-full mx-auto mb-4 flex items-center justify-center font-black text-3xl text-indigo-300">${(m.uid || '?')[0].toUpperCase()}</div>
-                    <h2 class="text-xl font-black text-slate-800">${m.name}</h2>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">${m.role}</p>
-                    <div class="bg-slate-50 p-4 rounded-2xl border text-sm font-bold text-slate-700 mb-4">${m.email}</div>
-                    ${isManager ? `<button onclick="promote('${m.id}')" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl text-xs uppercase mb-2">Promote to Manager</button>` : ''}
-                </div>
-            `;
-            document.getElementById('memberList').classList.add('hidden');
-            document.getElementById('memberDetail').classList.remove('hidden');
-            lucide.createIcons();
-        };
-
-        window.promote = async (uid) => {
-            try {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', uid), { role: 'Manager' });
-                alert("Role updated.");
-            } catch (err) {
-                console.error("Promote failed:", err);
-            }
-        };
-
-        window.updateRoutine = async () => {
-            const day = document.getElementById('rotDay').value;
-            try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'routine', day), {
-                    day, lunch: document.getElementById('rotL').value, dinner: document.getElementById('rotD').value
-                });
-                toggleModal('routineModal');
-            } catch (err) {
-                console.error("Routine update failed:", err);
-            }
-        };
-
-        window.switchTab = (t) => {
-            ['meal','grocery','utility'].forEach(x => {
-                document.getElementById(`tab-${x}`).className = (x === t) ? "flex-1 py-3 rounded-2xl text-xs font-bold bg-indigo-600 text-white" : "flex-1 py-3 rounded-2xl text-xs font-bold bg-white text-slate-500 border";
-            });
-            const box = document.getElementById('historyContent');
-            box.innerHTML = emptyDataHTML(`No ${t} records.`);
-            lucide.createIcons();
-        };
-
+        // NAVIGATION
         window.nav = (v) => {
             document.querySelectorAll('.view').forEach(x => x.classList.add('hidden'));
             document.getElementById(`view-${v}`).classList.remove('hidden');
-            ['home','history','members'].forEach(x => {
-                document.getElementById(`nav-${x}`).className = (x === v) ? "p-3 rounded-full text-white bg-slate-800" : "p-3 rounded-full text-slate-500";
-            });
+            ['home','history','members'].forEach(x => document.getElementById(`nav-${x}`).className = (x === v) ? "p-3 rounded-full text-white bg-slate-800" : "p-3 rounded-full text-slate-500");
             lucide.createIcons();
         };
 
         window.toggleModal = (id) => document.getElementById(id).classList.toggle('hidden');
-        window.hideDetail = () => { document.getElementById('memberList').classList.remove('hidden'); document.getElementById('memberDetail').classList.add('hidden'); };
-        window.saveDaily = () => alert("Changes saved to cloud.");
-        window.loadDayMenu = () => {
-            const d = routine.find(x => x.day === document.getElementById('rotDay').value);
-            document.getElementById('rotL').value = d ? d.lunch : '';
-            document.getElementById('rotD').value = d ? d.dinner : '';
-        };
+        window.saveDaily = () => alert("Saved to database!");
 
-        // STARTUP
         initAuth();
     </script>
 </body>
