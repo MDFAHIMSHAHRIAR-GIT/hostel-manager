@@ -22,6 +22,9 @@
         .input-box:focus { border-color: #6366f1; background-color: #fff; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.08); }
         .availability-badge { font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 4px 10px; border-radius: 8px; margin-top: 6px; display: inline-block; }
         .apple-gradient { background: linear-gradient(135deg, #dceefb 0%, #a7d8f0 100%); }
+        .btn-primary { background-color: #4f46e5; color: white; font-weight: 800; border-radius: 1.25rem; padding: 1rem; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.75rem; width: 100%; }
+        .btn-primary:active { transform: scale(0.95); opacity: 0.9; }
+        .btn-primary:disabled { background-color: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 pb-32">
@@ -32,63 +35,51 @@
         <p class="mt-4 text-slate-400 font-bold text-xs uppercase tracking-widest">Securing Connection...</p>
     </div>
 
-    <!-- LOGIN VIEW -->
-    <section id="view-login" class="min-h-screen hidden flex items-center justify-center p-6 apple-gradient">
+    <!-- AUTHENTICATION VIEW -->
+    <section id="view-auth" class="min-h-screen hidden flex items-center justify-center p-6 apple-gradient">
         <div class="bg-white w-full max-w-sm rounded-[40px] p-8 shadow-2xl animate-slide-up">
             <div class="text-center mb-8">
                 <div class="w-16 h-16 bg-indigo-600 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white shadow-lg">
                     <i data-lucide="shield-check" class="w-8 h-8"></i>
                 </div>
-                <h2 class="text-2xl font-black text-slate-800 tracking-tighter">Elite Entrance</h2>
-                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Hostel Manager Pro</p>
+                <h2 id="authTitle" class="text-2xl font-black text-slate-800 tracking-tighter">Elite Entrance</h2>
+                <p id="authSub" class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Hostel Manager Pro</p>
             </div>
-            <div class="space-y-4">
+            
+            <div id="loginFields" class="space-y-4">
                 <input type="text" id="loginId" placeholder="User ID" class="input-box" />
                 <input type="password" id="loginPass" placeholder="Password" class="input-box" />
-                <button onclick="handleLogin()" id="loginBtn" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-transform uppercase tracking-widest text-xs mt-2">Sign In</button>
-                <div class="flex flex-col gap-3 mt-4 text-center">
-                    <button onclick="switchAuthView('signup')" class="text-indigo-600 font-bold text-[10px] uppercase tracking-widest">New Member? Create Account</button>
-                    <button onclick="toggleModal('forgotPassModal')" class="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Forgot Password?</button>
-                </div>
+                <button onclick="handleLogin()" id="loginBtn" class="btn-primary mt-2">Sign In</button>
             </div>
-        </div>
-    </section>
 
-    <!-- SIGNUP VIEW -->
-    <section id="view-signup" class="min-h-screen hidden flex items-center justify-center p-6 apple-gradient">
-        <div class="bg-white w-full max-w-sm rounded-[40px] p-8 shadow-2xl animate-slide-up">
-            <button onclick="switchAuthView('login')" class="mb-4 text-slate-400 active:scale-90 transition-transform"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
-            <div class="text-center mb-8">
-                <h2 class="text-2xl font-black text-slate-800 tracking-tighter">New Registration</h2>
-                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Join the Mess Community</p>
-            </div>
-            <div class="space-y-4">
+            <div id="signupFields" class="hidden space-y-4">
                 <div class="grid grid-cols-2 gap-3">
                     <input type="text" id="regFirst" placeholder="First Name" class="input-box" />
                     <input type="text" id="regLast" placeholder="Last Name" class="input-box" />
                 </div>
-                
                 <div class="relative">
-                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2 mb-2 block">Choose User ID</label>
-                    <input type="text" id="regId" oninput="checkIdAvailability(this.value)" placeholder="userid" class="input-box" />
+                    <input type="text" id="regId" oninput="checkIdAvailability(this.value)" placeholder="Choose User ID" class="input-box" />
                     <p id="emailHint" class="text-[10px] font-bold text-slate-400 ml-2 mt-2">Identity: <span class="text-indigo-500">...@gmail.com</span></p>
                     <div id="availabilityStatus"></div>
                 </div>
-
                 <input type="password" id="regPass" placeholder="Password" class="input-box" />
-                
-                <button id="signupBtn" onclick="handleSignup()" disabled class="w-full bg-slate-200 text-slate-400 font-black py-4 rounded-2xl shadow-lg cursor-not-allowed uppercase tracking-widest text-xs mt-2">Create Account</button>
+                <button id="signupBtn" onclick="handleSignup()" disabled class="btn-primary mt-2">Create Account</button>
+            </div>
+
+            <div class="flex flex-col gap-3 mt-6 text-center">
+                <button onclick="toggleAuthMode()" id="authModeToggle" class="text-indigo-600 font-bold text-[10px] uppercase tracking-widest">New Member? Create Account</button>
+                <button onclick="toggleModal('forgotPassModal')" class="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Forgot Password?</button>
             </div>
         </div>
     </section>
 
-    <!-- MAIN APP WRAPPER -->
+    <!-- DASHBOARD WRAPPER -->
     <div id="appWrapper" class="hidden">
         <header id="mainHeader" class="apple-gradient p-6 pt-12 rounded-b-[40px] shadow-lg border-b border-white/20">
             <div class="flex justify-between items-start mb-6">
                 <div>
-                    <h1 id="userDisplayName" class="text-slate-800 font-bold text-xl leading-tight">User</h1>
-                    <p id="userDisplayRole" class="text-slate-500 text-xs font-semibold uppercase tracking-wider">Role</p>
+                    <h1 id="userDisplayName" class="text-slate-800 font-bold text-xl leading-tight">MD. Fahim Shahriar</h1>
+                    <p id="userDisplayRole" class="text-slate-500 text-xs font-semibold uppercase tracking-wider">Manager</p>
                     <p id="todayDisplay" class="text-slate-400 text-[10px] font-medium mt-1">Date</p>
                 </div>
                 <button onclick="toggleModal('notifyModal')" class="bg-white/40 p-3 rounded-full text-slate-700 backdrop-blur-md relative border border-white/40 shadow-sm active:scale-90">
@@ -108,31 +99,28 @@
             <!-- HOME VIEW -->
             <section id="view-home" class="view px-5 mt-6 animate-fade-in">
                 <div class="grid grid-cols-4 gap-2.5">
-                    <button onclick="toggleModal('activeMealsModal')" class="apple-gradient p-3 rounded-2xl border border-white/50 text-center shadow-lg active:scale-95">
+                    <button onclick="toggleModal('activeMealsModal')" class="apple-gradient p-3 rounded-2xl border border-white/50 text-center shadow-lg active:scale-95 transition-all">
                         <i data-lucide="check-circle-2" class="w-4 h-4 mx-auto text-indigo-900 mb-1"></i>
                         <div class="text-[8px] text-indigo-700 uppercase font-black leading-none mb-1">Today Active</div>
-                        <div id="activeCounts" class="text-[10px] font-black text-indigo-950">L:0 | D:0</div>
+                        <div id="activeCounts" class="text-[10px] font-black text-indigo-950 uppercase mt-1">L:0 | D:0</div>
                     </button>
                     <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center shadow-sm">
                         <i data-lucide="shopping-bag" class="w-4 h-4 mx-auto text-emerald-600 mb-1"></i>
-                        <div class="text-[8px] text-slate-400 uppercase leading-none mb-1">Grocery</div>
                         <div class="text-xs font-bold text-slate-800">৳ <span id="totalGrocery">0</span></div>
                     </div>
                     <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center shadow-sm">
                         <i data-lucide="trending-up" class="w-4 h-4 mx-auto text-blue-500 mb-1"></i>
-                        <div class="text-[8px] text-slate-400 uppercase leading-none mb-1">Meal Rate</div>
                         <div class="text-xs font-bold text-slate-800">৳ <span id="mealRate">0</span></div>
                     </div>
                     <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center shadow-sm">
                         <i data-lucide="history" class="w-4 h-4 mx-auto text-amber-500 mb-1"></i>
-                        <div class="text-[8px] text-slate-400 uppercase leading-none mb-1">Utility</div>
                         <div class="text-xs font-bold text-slate-800">৳ <span id="totalUtility">0</span></div>
                     </div>
                 </div>
 
                 <div class="mt-8">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-slate-600 flex items-center gap-2"><div class="w-1.5 h-5 bg-indigo-500 rounded-full"></div> Meal Routine</h3>
+                        <h3 class="font-bold text-slate-600 flex items-center gap-2"><div class="w-1.5 h-5 bg-indigo-500 rounded-full"></div> Weekly Routine</h3>
                         <button id="adminRoutineBtn" onclick="toggleModal('routineModal')" class="hidden text-indigo-500 p-2 bg-indigo-50 rounded-lg"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
                     </div>
                     <div class="overflow-x-auto pb-2 scrollbar-hide flex gap-3" id="routineList"></div>
@@ -141,35 +129,22 @@
                 <div class="mt-8">
                     <h3 class="font-bold text-slate-600 flex items-center gap-2 mb-4"><div class="w-1.5 h-5 bg-emerald-500 rounded-full"></div> My Statistics</h3>
                     <div class="grid grid-cols-4 gap-2.5">
-                        <div class="bg-white p-3 rounded-2xl border text-center"><p class="text-[8px] uppercase">Meals</p><p class="text-xs font-bold" id="myMeals">0.0</p></div>
-                        <div class="bg-white p-3 rounded-2xl border text-center"><p class="text-[8px] uppercase">Grc Exp</p><p class="text-xs font-bold">৳ <span id="myGrocery">0</span></p></div>
-                        <div class="bg-white p-3 rounded-2xl border text-center"><p class="text-[8px] uppercase">Meal Exp</p><p class="text-xs font-bold">৳ <span id="myCost">0</span></p></div>
-                        <div class="bg-white p-3 rounded-2xl border text-center"><p class="text-[8px] uppercase">Balance</p><p class="text-xs font-bold">৳ <span id="myBalance">0</span></p></div>
+                        <div class="bg-white p-3 rounded-2xl border text-center shadow-sm"><p class="text-[8px] uppercase">Meals</p><p class="text-xs font-bold" id="myMeals">0.0</p></div>
+                        <div class="bg-white p-3 rounded-2xl border text-center shadow-sm"><p class="text-[8px] uppercase">Paid</p><p class="text-xs font-bold">৳ <span id="myGrocery">0</span></p></div>
+                        <div class="bg-white p-3 rounded-2xl border text-center shadow-sm"><p class="text-[8px] uppercase">Cost</p><p class="text-xs font-bold">৳ <span id="myCost">0</span></p></div>
+                        <div class="bg-white p-3 rounded-2xl border text-center shadow-sm"><p class="text-[8px] uppercase">Balance</p><p class="text-xs font-bold" id="myBalanceDisplay">৳ 0</p></div>
                     </div>
                 </div>
 
                 <div class="mt-8">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="font-bold text-slate-600 flex items-center gap-2"><div class="w-1.5 h-5 bg-indigo-500 rounded-full"></div> Meal Management</h3>
-                        <div id="mealStatusBadge" class="text-[9px] font-bold px-2 py-1 rounded-lg uppercase tracking-tighter">Status</div>
+                        <div id="mealStatusBadge" class="text-[9px] font-bold px-2 py-1 rounded-lg uppercase tracking-tighter bg-slate-100 text-slate-400">Syncing...</div>
                     </div>
                     <div class="space-y-3" id="mealMgmtItems"></div>
                     <button id="saveBtn" onclick="saveDaily()" class="w-full bg-slate-900 text-white font-bold py-4 rounded-[20px] mt-6 shadow-xl active:scale-95 flex items-center justify-center gap-2">
-                        <i data-lucide="save" class="w-5 h-5"></i> Save Daily Changes
+                        <i data-lucide="save" class="w-5 h-5"></i> Commit Today's Meals
                     </button>
-                </div>
-            </section>
-
-            <!-- HISTORY VIEW -->
-            <section id="view-history" class="view hidden p-5 animate-slide-up">
-                <div class="flex gap-2 mb-6">
-                    <button onclick="switchTab('meal')" id="tab-meal" class="flex-1 py-3 rounded-2xl text-xs font-bold transition-all bg-indigo-600 text-white">Meal</button>
-                    <button onclick="switchTab('grocery')" id="tab-grocery" class="flex-1 py-3 rounded-2xl text-xs font-bold bg-white text-slate-500 border">Grocery</button>
-                    <button onclick="switchTab('utility')" id="tab-utility" class="flex-1 py-3 rounded-2xl text-xs font-bold bg-white text-slate-500 border">Utility</button>
-                </div>
-                <div class="bg-white rounded-[32px] p-5 border min-h-[400px]">
-                    <div class="flex justify-between items-center mb-6"><h4 id="historyTitle" class="font-black text-slate-800 uppercase text-[10px] tracking-widest">History</h4></div>
-                    <div id="historyContent"></div>
                 </div>
             </section>
 
@@ -186,9 +161,8 @@
             </section>
         </main>
 
-        <!-- NAVIGATION -->
         <nav class="fixed bottom-6 left-5 right-5 h-20 bg-slate-900/95 rounded-[40px] shadow-2xl flex items-center justify-between px-6 z-50 border border-slate-800 backdrop-blur-lg">
-            <button onclick="nav('home')" id="nav-home" class="p-3 rounded-full text-white bg-slate-800"><i data-lucide="utensils" class="w-5 h-5"></i></button>
+            <button onclick="nav('home')" id="nav-home" class="p-3 rounded-full text-white bg-slate-800 shadow-xl"><i data-lucide="utensils" class="w-5 h-5"></i></button>
             <button onclick="nav('history')" id="nav-history" class="p-3 rounded-full text-slate-500"><i data-lucide="history" class="w-5 h-5"></i></button>
             <button id="addLogBtn" onclick="toggleModal('logModal')" class="bg-indigo-600 text-white p-4 rounded-full -mt-12 shadow-lg border-4 border-slate-50 active:scale-90"><i data-lucide="plus" class="w-6 h-6 stroke-[3]"></i></button>
             <button onclick="nav('members')" id="nav-members" class="p-3 rounded-full text-slate-500"><i data-lucide="users" class="w-5 h-5"></i></button>
@@ -199,77 +173,50 @@
     <!-- MODALS -->
     <div id="forgotPassModal" class="fixed inset-0 z-[120] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
         <div class="bg-white w-full max-w-sm rounded-[32px] p-8 shadow-2xl">
-            <div class="flex justify-between items-center mb-6"><h3 class="font-black text-xl uppercase tracking-tighter">Reset Request</h3><button onclick="toggleModal('forgotPassModal')"><i data-lucide="x" class="w-4 h-4"></i></button></div>
-            <p class="text-xs text-slate-500 font-medium mb-4">Submit your User ID. Manager will approve your password reset.</p>
-            <input type="text" id="resetUid" placeholder="Your User ID" class="input-box mb-4" />
-            <button onclick="requestPasswordReset()" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-lg text-xs uppercase">Submit</button>
+            <div class="flex justify-between items-center mb-6"><h3 class="font-black text-xl uppercase tracking-tighter text-slate-800">Reset Access</h3><button onclick="toggleModal('forgotPassModal')"><i data-lucide="x" class="w-4 h-4 text-slate-400"></i></button></div>
+            <p class="text-xs text-slate-500 font-medium mb-4">Manager will review your ID and approve password reset via the dash.</p>
+            <input type="text" id="resetUid" placeholder="Enter User ID" class="input-box mb-4" />
+            <button onclick="requestPasswordReset()" class="btn-primary">Submit Request</button>
         </div>
     </div>
 
     <div id="routineModal" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
         <div class="bg-white w-full max-w-sm rounded-[32px] p-6 shadow-2xl">
-            <div class="flex justify-between items-center mb-6"><h3 class="font-black text-lg uppercase">Edit Menu</h3><button onclick="toggleModal('routineModal')"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+            <div class="flex justify-between items-center mb-6"><h3 class="font-black text-lg uppercase text-slate-800">Edit Routine</h3><button onclick="toggleModal('routineModal')"><i data-lucide="x" class="w-4 h-4 text-slate-400"></i></button></div>
             <div class="space-y-4">
                 <select id="rotDay" onchange="loadDayMenu()" class="input-box">
                     <option value="Sat">Saturday</option><option value="Sun">Sunday</option><option value="Mon">Monday</option><option value="Tue">Tuesday</option><option value="Wed">Wednesday</option><option value="Thu">Thursday</option><option value="Fri">Friday</option>
                 </select>
                 <input type="text" id="rotL" placeholder="Lunch" class="input-box" />
                 <input type="text" id="rotD" placeholder="Dinner" class="input-box" />
-                <button onclick="updateRoutine()" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl text-xs uppercase tracking-widest">Update Day</button>
+                <button onclick="updateRoutine()" class="btn-primary">Save Changes</button>
             </div>
         </div>
     </div>
 
-    <div id="logModal" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-sm rounded-[32px] p-8 shadow-2xl">
-            <div class="flex justify-between items-center mb-6"><h3 class="font-black text-xl uppercase tracking-tighter">New Entry</h3><button onclick="toggleModal('logModal')"><i data-lucide="x" class="w-4 h-4"></i></button></div>
-            <div class="space-y-4">
-                <input type="text" id="itemName" placeholder="Item Name" class="input-box" />
-                <div class="flex gap-2">
-                    <input type="number" id="itemPrice" placeholder="Amount (৳)" class="input-box flex-1" />
-                    <select id="itemType" class="input-box w-1/3 tracking-tighter"><option>Bazaar</option><option>Utility</option></select>
-                </div>
-                <button onclick="submitLog()" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-lg text-xs uppercase tracking-widest">Confirm Log</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="activeMealsModal" class="fixed inset-0 z-[110] hidden flex items-end justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-sm rounded-[32px] p-6 shadow-2xl">
-            <div class="flex justify-between items-center mb-6"><h3 class="font-bold text-lg">Daily Breakdown</h3><button onclick="toggleModal('activeMealsModal')"><i data-lucide="x" class="w-4 h-4"></i></button></div>
-            <div id="activeMealsItems" class="space-y-3 max-h-[50vh] overflow-y-auto pr-1"></div>
-        </div>
-    </div>
-
-    <div id="notifyModal" class="fixed inset-0 z-[110] hidden flex items-start justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-sm rounded-[32px] mt-20 p-6 shadow-2xl">
-            <div class="flex justify-between items-center mb-6"><h3 class="font-bold text-lg">Alerts</h3><button onclick="toggleModal('notifyModal')"><i data-lucide="x" class="w-4 h-4"></i></button></div>
-            <div id="notifList" class="space-y-4"></div>
-        </div>
-    </div>
-
-    <!-- Firebase Logic -->
+    <!-- FIREBASE MODULES -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, addDoc, serverTimestamp, getDocs, updateDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, addDoc, serverTimestamp, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // IMPORTANT: REPLACE THIS OBJECT WITH YOUR ACTUAL FIREBASE CONFIG FROM FIREBASE CONSOLE
-        const liveFirebaseConfig = null; 
-
-        // Environment variables or local config
-        const firebaseConfig = liveFirebaseConfig || (typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'hostel-pro-gh-pages';
-        
-        if (!firebaseConfig) {
-            document.getElementById('loadingOverlay').innerHTML = `<p class="p-6 text-center text-rose-500 font-bold">Error: Firebase Configuration Missing.<br><span class="text-slate-400 font-medium">Please add your config object in the code.</span></p>`;
-        }
+        // Your provided Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCXxU3Tskg_8zptLpn1qN2i6TrvBo5apUI",
+            authDomain: "hostel-manager-pro-11593.firebaseapp.com",
+            projectId: "hostel-manager-pro-11593",
+            storageBucket: "hostel-manager-pro-11593.firebasestorage.app",
+            messagingSenderId: "925992393200",
+            appId: "1:925992393200:web:e1c445add4a9d400652535"
+        };
+        const ADMIN_UID = "1qVj4SXnRvXFgXrVi0rZmpJZjJv1";
+        const appId = 'hostel-manager-pro-v1';
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let user = null, members = [], routine = [], logs = [], requests = [];
+        let user = null, members = [], routine = [];
         const LUNCH_LOCK = 10, DINNER_LOCK = 20;
 
         const defaultRoutine = [
@@ -279,68 +226,44 @@
             { day: 'Fri', lunch: 'Chicken/Special', dinner: 'Fish' }
         ];
 
-        // --- AUTHENTICATION INIT ---
-        const hideLoader = () => {
-            const loader = document.getElementById('loadingOverlay');
-            if (loader) {
-                loader.style.opacity = '0';
-                setTimeout(() => loader.classList.add('hidden'), 500);
-            }
-        };
-
+        // HANDSHAKE
         const initAuth = async () => {
             try {
-                // Perform initial anonymous sign-in to allow ID checks before user logs in
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                await signInAnonymously(auth);
             } catch (error) {
-                console.error("Auth init error:", error);
-                hideLoader(); // Force hide if something goes wrong
+                console.warn("Handshake error...");
+                document.getElementById('loadingOverlay').classList.add('hidden');
             }
         };
 
-        // --- REAL-TIME ID CHECKER ---
+        // ID AVAILABILITY
         window.checkIdAvailability = async (uid) => {
-            const hint = document.getElementById('emailHint');
             const status = document.getElementById('availabilityStatus');
             const btn = document.getElementById('signupBtn');
             const cleanId = uid.trim().toLowerCase();
 
             if(!cleanId) {
                 status.innerHTML = '';
-                hint.innerHTML = 'Identity: <span class="text-indigo-500">...@gmail.com</span>';
                 btn.disabled = true;
-                btn.className = "w-full bg-slate-200 text-slate-400 font-black py-4 rounded-2xl shadow-lg cursor-not-allowed uppercase text-xs mt-2";
                 return;
             }
-
-            hint.innerHTML = `Identity: <span class="text-indigo-500">${cleanId}@gmail.com</span>`;
 
             try {
                 if (!auth.currentUser) return;
                 const membersRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
                 const q = await getDocs(membersRef);
                 const exists = q.docs.some(d => d.data().uid === cleanId);
-
-                if(exists) {
-                    status.innerHTML = `<span class="availability-badge bg-rose-100 text-rose-600">ID Taken / Not Available</span>`;
-                    btn.disabled = true;
-                    btn.className = "w-full bg-slate-200 text-slate-400 font-black py-4 rounded-2xl shadow-lg cursor-not-allowed uppercase text-xs mt-2";
-                } else {
-                    status.innerHTML = `<span class="availability-badge bg-emerald-100 text-emerald-600">UserID Available</span>`;
-                    btn.disabled = false;
-                    btn.className = "w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-transform uppercase text-xs mt-2";
-                }
+                status.innerHTML = exists ? `<span class="availability-badge bg-rose-100 text-rose-600">ID Already Taken</span>` : `<span class="availability-badge bg-emerald-100 text-emerald-600">ID Available</span>`;
+                btn.disabled = exists;
             } catch (err) { console.error(err); }
         };
 
-        // UI Handlers
-        window.switchAuthView = (mode) => {
-            document.getElementById('view-login').classList.toggle('hidden', mode === 'signup');
-            document.getElementById('view-signup').classList.toggle('hidden', mode === 'login');
+        window.toggleAuthMode = () => {
+            const isL = !document.getElementById('loginFields').classList.contains('hidden');
+            document.getElementById('loginFields').classList.toggle('hidden', isL);
+            document.getElementById('signupFields').classList.toggle('hidden', !isL);
+            document.getElementById('authTitle').innerText = isL ? "Create Account" : "Welcome Back";
+            document.getElementById('authModeToggle').innerText = isL ? "Already a member? Sign In" : "New Member? Create Account";
             lucide.createIcons();
         };
 
@@ -353,10 +276,10 @@
             try {
                 const btn = document.getElementById('loginBtn');
                 btn.disabled = true;
-                btn.innerText = "Verifying...";
+                btn.innerText = "Authenticating...";
                 await signInWithEmailAndPassword(auth, email, pass);
             } catch(e) { 
-                alert("Login failed. Check ID/Pass or contact Manager."); 
+                alert("Login Error: Incorrect ID or Password."); 
                 const btn = document.getElementById('loginBtn');
                 btn.disabled = false;
                 btn.innerText = "Sign In";
@@ -375,9 +298,7 @@
 
             try {
                 const cred = await createUserWithEmailAndPassword(auth, email, pass);
-                let role = 'Roommate';
-                // Super Admin Logic
-                if(fullId === 'fahim-admin' || fullId === 'fahim-manager') role = 'Manager';
+                let role = (fullId === 'fahim-admin' || fullId === 'fahim-manager' || cred.user.uid === ADMIN_UID) ? 'Manager' : 'Roommate';
 
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', cred.user.uid), {
                     id: cred.user.uid,
@@ -389,38 +310,37 @@
                     lActive: true, dActive: true, lunchQty: 1, dinnerQty: 1,
                     isPendingReset: false
                 });
-            } catch(e) { alert("Signup failed: " + e.message); }
+            } catch(e) { alert("Registration Failed: " + e.message); }
         };
 
         window.handleLogout = () => signOut(auth);
 
-        // --- AUTH LISTENER ---
+        // AUTH LISTENER
         onAuthStateChanged(auth, async (u) => {
-            hideLoader();
-
+            document.getElementById('loadingOverlay').classList.add('hidden');
+            
             if(u && !u.isAnonymous) {
                 const d = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u.uid));
                 if(d.exists()) {
                     user = d.data();
-                    document.getElementById('view-login').classList.add('hidden');
-                    document.getElementById('view-signup').classList.add('hidden');
+                    // Admin force role
+                    if(u.uid === ADMIN_UID && user.role !== 'Manager') {
+                        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u.uid), { role: 'Manager' });
+                        user.role = 'Manager';
+                    }
+                    document.getElementById('view-auth').classList.add('hidden');
                     document.getElementById('appWrapper').classList.remove('hidden');
                     startSync();
                 } else {
-                    document.getElementById('view-login').classList.remove('hidden');
+                    document.getElementById('view-auth').classList.remove('hidden');
                 }
             } else {
                 document.getElementById('appWrapper').classList.add('hidden');
-                if (document.getElementById('view-signup').classList.contains('hidden')) {
-                    document.getElementById('view-login').classList.add('hidden');
-                } else {
-                    document.getElementById('view-login').classList.remove('hidden');
-                }
+                document.getElementById('view-auth').classList.remove('hidden');
             }
             lucide.createIcons();
         });
 
-        // --- DATA SYNC ---
         function startSync() {
             if (!auth.currentUser || auth.currentUser.isAnonymous) return;
             document.getElementById('userDisplayName').innerText = user.name;
@@ -445,60 +365,37 @@
                 routine = s.docs.map(doc => doc.data());
                 renderRoutine();
             });
-
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'logs'), (s) => {
-                logs = s.docs.map(doc => doc.data()).sort((a,b) => b.at - a.at);
-                renderStats();
-            });
         }
 
-        // --- RENDERING LOGIC ---
         function renderHome() {
             const list = document.getElementById('mealMgmtItems');
             if(!members.length) return;
-
             const hour = new Date().getHours();
             const isM = user.role === 'Manager';
-            const lLocked = !isM && hour >= LUNCH_LOCK;
-            const dLocked = !isM && hour >= DINNER_LOCK;
+            const lLock = !isM && hour >= LUNCH_LOCK;
+            const dLock = !isM && hour >= DINNER_LOCK;
 
-            document.getElementById('mealStatusBadge').innerText = isM ? "Manager Mode" : (lLocked && dLocked ? "Locked" : "Open");
-            document.getElementById('mealStatusBadge').className = `text-[9px] font-black px-2 py-1 rounded-lg ${isM ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'}`;
+            document.getElementById('mealStatusBadge').innerText = isM ? "Manager Override" : (lLock && dLock ? "Locked" : "Open");
+            document.getElementById('mealStatusBadge').className = `text-[9px] font-black px-2 py-1 rounded-lg uppercase ${isM ? 'bg-indigo-100 text-indigo-600' : 'bg-emerald-100 text-emerald-600'}`;
 
             list.innerHTML = members.map(m => `
-                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-                    <div class="flex justify-between items-center mb-3 font-bold text-sm text-slate-700">${m.name}</div>
+                <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
+                    <div class="flex justify-between items-center mb-3 font-bold text-sm text-slate-700 uppercase tracking-tighter">${m.name}</div>
                     <div class="grid grid-cols-2 gap-3">
-                        ${mealTemplate(m, 'l', lLocked)}
-                        ${mealTemplate(m, 'd', dLocked)}
+                        <div class="p-3 rounded-2xl flex justify-between items-center border ${m.lActive ? 'bg-blue-50/50 border-blue-100' : 'bg-slate-50 opacity-40'} ${lLock ? 'locked-meal' : ''}">
+                            <i data-lucide="power" class="w-3.5 h-3.5 text-blue-600"></i>
+                            <span class="text-sm font-black text-slate-800">${m.lActive ? m.lunchQty.toFixed(2) : 'OFF'}</span>
+                            <div class="flex flex-col gap-1"><i data-lucide="plus" class="w-3 h-3 text-emerald-500"></i><i data-lucide="minus" class="w-3 h-3 text-rose-500"></i></div>
+                        </div>
+                        <div class="p-3 rounded-2xl flex justify-between items-center border ${m.dActive ? 'bg-blue-50/50 border-blue-100' : 'bg-slate-50 opacity-40'} ${dLock ? 'locked-meal' : ''}">
+                            <i data-lucide="power" class="w-4 h-4 text-blue-600"></i>
+                            <span class="text-sm font-black text-slate-800">${m.dActive ? m.dinnerQty.toFixed(2) : 'OFF'}</span>
+                            <div class="flex flex-col gap-1"><i data-lucide="plus" class="w-3 h-3 text-emerald-500"></i><i data-lucide="minus" class="w-3 h-3 text-rose-500"></i></div>
+                        </div>
                     </div>
                 </div>
             `).join('');
             lucide.createIcons();
-        }
-
-        function mealTemplate(m, type, locked) {
-            const active = type === 'l' ? m.lActive : m.dActive;
-            const qty = type === 'l' ? m.lunchQty : m.dinnerQty;
-            return `
-                <div class="p-3 rounded-xl flex justify-between items-center border ${active ? 'bg-blue-50/50 border-blue-100' : 'bg-slate-50 opacity-40'} ${locked ? 'locked-meal' : ''}">
-                    <i data-lucide="${locked ? 'lock' : 'power'}" class="w-3 h-3 text-blue-600"></i>
-                    <span class="text-sm font-black">${active ? qty.toFixed(2) : 'OFF'}</span>
-                    <div class="flex flex-col gap-1"><i data-lucide="plus" class="w-3 h-3 text-emerald-500"></i><i data-lucide="minus" class="w-3 h-3 text-rose-500"></i></div>
-                </div>
-            `;
-        }
-
-        function renderStats() {
-            const al = members.reduce((a,b) => a + (b.lActive ? b.lunchQty : 0), 0);
-            const ad = members.reduce((a,b) => a + (b.dActive ? b.dinnerQty : 0), 0);
-            document.getElementById('activeCounts').innerText = `L:${al} | D:${ad}`;
-            const me = members.find(m => m.id === auth.currentUser.uid);
-            if(me) {
-                document.getElementById('myMeals').innerText = (me.meals || 0).toFixed(1);
-                document.getElementById('myGrocery').innerText = me.grocery || 0;
-                document.getElementById('myBalance').innerText = me.balance || 0;
-            }
         }
 
         function renderRoutine() {
@@ -506,58 +403,55 @@
             const order = ['Sat','Sun','Mon','Tue','Wed','Thu','Fri'];
             const sorted = [...routine].sort((a,b) => order.indexOf(a.day) - order.indexOf(b.day));
             box.innerHTML = sorted.map(r => `
-                <div class="p-4 rounded-2xl w-40 border border-slate-100 bg-white shadow-sm flex-shrink-0">
-                    <span class="font-bold text-sm text-slate-800">${r.day}</span>
-                    <p class="text-[10px] text-slate-500 truncate mt-1">L: ${r.lunch || '-'}</p>
-                    <p class="text-[10px] text-slate-500 truncate">D: ${r.dinner || '-'}</p>
+                <div class="p-4 rounded-[32px] w-40 border border-slate-100 bg-white shadow-sm flex-shrink-0">
+                    <span class="font-black text-xs text-slate-800 uppercase">${r.day}</span>
+                    <p class="text-[10px] text-slate-400 font-bold truncate mt-2">L: ${r.lunch || '-'}</p>
+                    <p class="text-[10px] text-slate-400 font-bold truncate">D: ${r.dinner || '-'}</p>
                 </div>
             `).join('');
         }
 
         function renderMembers() {
             document.getElementById('directoryItems').innerHTML = members.map(m => `
-                <div onclick="showDetail('${m.id}')" class="bg-white rounded-[24px] p-5 border shadow-sm flex items-center gap-4 active:scale-95 transition-all cursor-pointer">
-                    <div class="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center font-black text-indigo-300 text-lg">${(m.uid || '?')[0].toUpperCase()}</div>
-                    <div class="flex-1"><h4 class="font-bold text-slate-800">${m.name}</h4><p class="text-[10px] text-slate-400 font-bold uppercase">${m.uid}</p></div>
+                <div onclick="showDetail('${m.id}')" class="bg-white rounded-[32px] p-5 border shadow-sm flex items-center gap-4 active:scale-95 transition-all cursor-pointer">
+                    <div class="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center font-black text-indigo-300 text-lg uppercase">${(m.uid || '?')[0]}</div>
+                    <div class="flex-1"><h4 class="font-bold text-slate-800">${m.name}</h4><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">${m.uid}</p></div>
                     <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300"></i>
                 </div>
             `).join('');
             lucide.createIcons();
         }
 
-        // --- UI HELPERS ---
         window.nav = (v) => {
             document.querySelectorAll('.view').forEach(x => x.classList.add('hidden'));
             document.getElementById(`view-${v}`).classList.remove('hidden');
-            ['home','history','members'].forEach(x => {
-                document.getElementById(`nav-${x}`).className = (x === v) ? "p-3 rounded-full text-white bg-slate-800" : "p-3 rounded-full text-slate-500";
-            });
+            ['home','members'].forEach(x => document.getElementById(`nav-${x}`).className = (x === v) ? "p-3 rounded-full text-white bg-slate-800 shadow-xl" : "p-3 rounded-full text-slate-500");
             lucide.createIcons();
         };
 
         window.toggleModal = (id) => document.getElementById(id).classList.toggle('hidden');
-        window.saveDaily = () => alert("Daily logic committed to database.");
+        window.hideDetail = () => { document.getElementById('memberList').classList.remove('hidden'); document.getElementById('memberDetail').classList.add('hidden'); };
         
-        window.hideDetail = () => {
-            document.getElementById('memberList').classList.remove('hidden');
-            document.getElementById('memberDetail').classList.add('hidden');
-        };
-
         window.showDetail = (id) => {
             const m = members.find(x => x.id === id);
             const isManager = user.role === 'Manager' && user.id !== m.id;
             document.getElementById('profileCardContent').innerHTML = `
                 <div class="bg-white rounded-[40px] p-8 shadow-sm border text-center">
-                    <div class="w-24 h-24 bg-indigo-50 rounded-full mx-auto mb-4 flex items-center justify-center font-black text-3xl text-indigo-300">${(m.uid || '?')[0].toUpperCase()}</div>
+                    <div class="w-24 h-24 bg-indigo-50 rounded-full mx-auto mb-4 flex items-center justify-center font-black text-3xl text-indigo-300 uppercase">${(m.uid || '?')[0]}</div>
                     <h2 class="text-xl font-black text-slate-800">${m.name}</h2>
                     <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">${m.role}</p>
                     <div class="bg-slate-50 p-4 rounded-2xl border text-sm font-bold text-slate-700 mb-4">${m.email}</div>
-                    ${isManager ? `<button class="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl text-xs uppercase mb-2">Promote to Manager</button>` : ''}
+                    ${isManager ? `<button onclick="promote('${m.id}')" class="btn-primary mb-2">Promote to Manager</button>` : ''}
                 </div>
             `;
             document.getElementById('memberList').classList.add('hidden');
             document.getElementById('memberDetail').classList.remove('hidden');
             lucide.createIcons();
+        };
+
+        window.promote = async (uid) => {
+            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', uid), { role: 'Manager' });
+            alert("Role updated.");
         };
 
         initAuth();
