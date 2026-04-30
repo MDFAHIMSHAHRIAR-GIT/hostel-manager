@@ -210,7 +210,7 @@
             appId: "1:925992393200:web:e1c445add4a9d400652535"
         };
         const ADMIN_UID = "1qVj4SXnRvXFgXrVi0rZmpJZjJv1";
-        const appId = 'hostel-manager-pro-v1';
+        const appId = 'hostel-manager-pro-11593';
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -226,17 +226,19 @@
             { day: 'Fri', lunch: 'Chicken/Special', dinner: 'Fish' }
         ];
 
-        // HANDSHAKE
+        // --- AUTH INIT ---
         const initAuth = async () => {
             try {
+                // Anonymous handshake for ID checks
                 await signInAnonymously(auth);
             } catch (error) {
-                console.warn("Handshake error...");
+                console.warn("Auth init error:", error);
                 document.getElementById('loadingOverlay').classList.add('hidden');
+                document.getElementById('view-auth').classList.remove('hidden');
             }
         };
 
-        // ID AVAILABILITY
+        // --- ID AVAILABILITY ---
         window.checkIdAvailability = async (uid) => {
             const status = document.getElementById('availabilityStatus');
             const btn = document.getElementById('signupBtn');
@@ -253,18 +255,18 @@
                 const membersRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
                 const q = await getDocs(membersRef);
                 const exists = q.docs.some(d => d.data().uid === cleanId);
-                status.innerHTML = exists ? `<span class="availability-badge bg-rose-100 text-rose-600">ID Already Taken</span>` : `<span class="availability-badge bg-emerald-100 text-emerald-600">ID Available</span>`;
+                status.innerHTML = exists ? `<span class="availability-badge bg-rose-100 text-rose-600">ID Taken</span>` : `<span class="availability-badge bg-emerald-100 text-emerald-600">ID Available</span>`;
                 btn.disabled = exists;
             } catch (err) { console.error(err); }
         };
 
         window.toggleAuthMode = () => {
-            const isL = !document.getElementById('loginFields').classList.contains('hidden');
-            document.getElementById('loginFields').classList.toggle('hidden', isL);
-            document.getElementById('signupFields').classList.toggle('hidden', !isL);
-            document.getElementById('authTitle').innerText = isL ? "Create Account" : "Welcome Back";
-            document.getElementById('authModeToggle').innerText = isL ? "Already a member? Sign In" : "New Member? Create Account";
-            lucide.createIcons();
+            const isLogin = !document.getElementById('loginFields').classList.contains('hidden');
+            document.getElementById('loginFields').classList.toggle('hidden', isLogin);
+            document.getElementById('signupFields').classList.toggle('hidden', !isLogin);
+            document.getElementById('authTitle').innerText = isLogin ? "Create Account" : "Welcome Back";
+            document.getElementById('authModeToggle').innerText = isLogin ? "Already a member? Sign In" : "New Member? Create Account";
+            if (window.lucide) lucide.createIcons();
         };
 
         window.handleLogin = async () => {
@@ -315,30 +317,39 @@
 
         window.handleLogout = () => signOut(auth);
 
-        // AUTH LISTENER
+        // --- AUTH LISTENER ---
         onAuthStateChanged(auth, async (u) => {
+            // Safety: Ensure loader is hidden
             document.getElementById('loadingOverlay').classList.add('hidden');
             
             if(u && !u.isAnonymous) {
-                const d = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u.uid));
-                if(d.exists()) {
-                    user = d.data();
-                    // Admin force role
-                    if(u.uid === ADMIN_UID && user.role !== 'Manager') {
-                        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u.uid), { role: 'Manager' });
-                        user.role = 'Manager';
+                try {
+                    const d = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u.uid));
+                    if(d.exists()) {
+                        user = d.data();
+                        // Force role update for admin
+                        if(u.uid === ADMIN_UID && user.role !== 'Manager') {
+                            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u.uid), { role: 'Manager' });
+                            user.role = 'Manager';
+                        }
+                        document.getElementById('view-auth').classList.add('hidden');
+                        document.getElementById('appWrapper').classList.remove('hidden');
+                        startSync();
+                    } else {
+                        // User exists in Auth but no profile in Firestore
+                        document.getElementById('view-auth').classList.remove('hidden');
+                        document.getElementById('appWrapper').classList.add('hidden');
                     }
-                    document.getElementById('view-auth').classList.add('hidden');
-                    document.getElementById('appWrapper').classList.remove('hidden');
-                    startSync();
-                } else {
+                } catch (e) {
+                    console.error("User fetch error:", e);
                     document.getElementById('view-auth').classList.remove('hidden');
                 }
             } else {
+                // Not logged in or just anonymous (handshake state)
                 document.getElementById('appWrapper').classList.add('hidden');
                 document.getElementById('view-auth').classList.remove('hidden');
             }
-            lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
         });
 
         function startSync() {
@@ -356,7 +367,7 @@
                 members = s.docs.map(doc => doc.data());
                 renderHome();
                 renderMembers();
-            });
+            }, (err) => console.error("Sync error:", err));
 
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'routine'), (s) => {
                 if(s.empty) {
@@ -367,6 +378,7 @@
             });
         }
 
+        // --- RENDERERS ---
         function renderHome() {
             const list = document.getElementById('mealMgmtItems');
             if(!members.length) return;
@@ -375,27 +387,28 @@
             const lLock = !isM && hour >= LUNCH_LOCK;
             const dLock = !isM && hour >= DINNER_LOCK;
 
-            document.getElementById('mealStatusBadge').innerText = isM ? "Manager Override" : (lLock && dLock ? "Locked" : "Open");
-            document.getElementById('mealStatusBadge').className = `text-[9px] font-black px-2 py-1 rounded-lg uppercase ${isM ? 'bg-indigo-100 text-indigo-600' : 'bg-emerald-100 text-emerald-600'}`;
+            const badge = document.getElementById('mealStatusBadge');
+            badge.innerText = isM ? "Manager Override" : (lLock && dLock ? "Locked" : "Open");
+            badge.className = `text-[9px] font-black px-2 py-1 rounded-lg uppercase ${isM ? 'bg-indigo-100 text-indigo-600' : 'bg-emerald-100 text-emerald-600'}`;
 
             list.innerHTML = members.map(m => `
                 <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
                     <div class="flex justify-between items-center mb-3 font-bold text-sm text-slate-700 uppercase tracking-tighter">${m.name}</div>
                     <div class="grid grid-cols-2 gap-3">
                         <div class="p-3 rounded-2xl flex justify-between items-center border ${m.lActive ? 'bg-blue-50/50 border-blue-100' : 'bg-slate-50 opacity-40'} ${lLock ? 'locked-meal' : ''}">
-                            <i data-lucide="power" class="w-3.5 h-3.5 text-blue-600"></i>
+                            <i data-lucide="${lLock ? 'lock' : 'power'}" class="w-3.5 h-3.5 text-blue-600"></i>
                             <span class="text-sm font-black text-slate-800">${m.lActive ? m.lunchQty.toFixed(2) : 'OFF'}</span>
                             <div class="flex flex-col gap-1"><i data-lucide="plus" class="w-3 h-3 text-emerald-500"></i><i data-lucide="minus" class="w-3 h-3 text-rose-500"></i></div>
                         </div>
                         <div class="p-3 rounded-2xl flex justify-between items-center border ${m.dActive ? 'bg-blue-50/50 border-blue-100' : 'bg-slate-50 opacity-40'} ${dLock ? 'locked-meal' : ''}">
-                            <i data-lucide="power" class="w-4 h-4 text-blue-600"></i>
+                            <i data-lucide="${dLock ? 'lock' : 'power'}" class="w-4 h-4 text-blue-600"></i>
                             <span class="text-sm font-black text-slate-800">${m.dActive ? m.dinnerQty.toFixed(2) : 'OFF'}</span>
                             <div class="flex flex-col gap-1"><i data-lucide="plus" class="w-3 h-3 text-emerald-500"></i><i data-lucide="minus" class="w-3 h-3 text-rose-500"></i></div>
                         </div>
                     </div>
                 </div>
             `).join('');
-            lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
         }
 
         function renderRoutine() {
@@ -419,14 +432,17 @@
                     <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300"></i>
                 </div>
             `).join('');
-            lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
         }
 
         window.nav = (v) => {
             document.querySelectorAll('.view').forEach(x => x.classList.add('hidden'));
             document.getElementById(`view-${v}`).classList.remove('hidden');
-            ['home','members'].forEach(x => document.getElementById(`nav-${x}`).className = (x === v) ? "p-3 rounded-full text-white bg-slate-800 shadow-xl" : "p-3 rounded-full text-slate-500");
-            lucide.createIcons();
+            ['home','members'].forEach(x => {
+                const btn = document.getElementById(`nav-${x}`);
+                if (btn) btn.className = (x === v) ? "p-3 rounded-full text-white bg-slate-800 shadow-xl" : "p-3 rounded-full text-slate-500";
+            });
+            if (window.lucide) lucide.createIcons();
         };
 
         window.toggleModal = (id) => document.getElementById(id).classList.toggle('hidden');
@@ -446,7 +462,7 @@
             `;
             document.getElementById('memberList').classList.add('hidden');
             document.getElementById('memberDetail').classList.remove('hidden');
-            lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
         };
 
         window.promote = async (uid) => {
